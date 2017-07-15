@@ -28,7 +28,7 @@ class Config
      * @param array $credentials
      * @param array $curlOptions
      */
-    public function __construct(array $basics, array $settings = [], array $credentials = [], array $curlOptions = [])
+    public function __construct(array $basics = [], array $settings = [], array $credentials = [], array $curlOptions = [])
     {
         // resolve basic options
         $resolver = new OptionsResolver();

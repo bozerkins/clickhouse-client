@@ -39,7 +39,7 @@ class Exception extends \Exception
         $this->request = $request;
         $this->response = $response;
 
-        $code = $response->getDetails()['http_code'];
+        $code = $response->getHttpCode();
         parent::__construct($message, $code, $previous);
     }
 

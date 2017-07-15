@@ -95,7 +95,7 @@ class ClientTest extends DefaultTest
 
         $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)', Format\JsonEachRowFormat::class);
+        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
 
         $this->client->writeRows('INSERT INTO t',
             [

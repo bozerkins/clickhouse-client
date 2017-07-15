@@ -10,6 +10,7 @@ namespace JustFuse\ClickhouseClient\Client;
 
 
 use JustFuse\ClickhouseClient\Client\Format\FormatInterface;
+use JustFuse\ClickhouseClient\Client\Format\JsonFormat;
 use JustFuse\ClickhouseClient\Connector\Connector;
 use JustFuse\ClickhouseClient\Connector\Request;
 
@@ -27,8 +28,9 @@ class Client
     /**
      * Client constructor.
      * @param Config $config
+     * @param string $defaultFormatClass
      */
-    public function __construct(Config $config, string $defaultFormatClass)
+    public function __construct(Config $config, string $defaultFormatClass = JsonFormat::class)
     {
         $this->config = $config;
 
@@ -51,6 +53,12 @@ class Client
         if (!in_array(FormatInterface::class, class_implements($formatClass))) {
             throw new \Exception('Default format class received (' . $formatClass . ') does not implement ' . FormatInterface::class);
         }
+    }
+
+    public function ping()
+    {
+        // make an empty request
+        return $this->connector->perform(new Request());
     }
 
     /**
@@ -78,8 +86,7 @@ class Client
         $request->setGet(
             array_merge(
                 $this->config->getSettings(),
-                ['query' => $sql],
-                ['readonly' => 1]
+                ['query' => $sql]
             )
         );
 

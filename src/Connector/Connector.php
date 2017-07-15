@@ -40,8 +40,13 @@ class Connector
         curl_setopt(
             $ch,
             CURLOPT_URL,
-            $this->config->getProtocol() . '://' . $this->config->getHost() . ':' . $this->config->getPort() . '?' .
-            http_build_query($request->accessGet())
+            sprintf(
+                '%s://%s:%s%s',
+                $this->config->getProtocol(),
+                $this->config->getHost(),
+                $this->config->getPort(),
+                ($request->hasGet() ? '?' . http_build_query($request->accessGet()) : '')
+            )
         );
 
         // set post parameters
@@ -83,7 +88,10 @@ class Connector
 
         // process error
         if ($response->getHttpCode() !== 200) {
-            throw new Exception($response->getContent(), $this->config, $request, $response);
+            if ($response->getHttpCode() === 0 && empty($output)) {
+                throw new Exception('Could not connect', $this->config, $request, $response);
+            }
+            throw new Exception($output, $this->config, $request, $response);
         }
 
         // return proper response

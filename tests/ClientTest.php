@@ -8,31 +8,64 @@
 
 namespace JustFuse\ClickhouseClient\Tests;
 
+use JustFuse\ClickhouseClient\Client\Client;
+use JustFuse\ClickhouseClient\Client\Config;
+use JustFuse\ClickhouseClient\Client\Format;
 use PHPUnit\Framework\TestCase;
 
 class ClientTest extends DefaultTest
 {
-    public function testSomething()
+    /** @var  Client */
+    protected $client;
+
+    protected function setUp()
     {
-        $config = new \JustFuse\ClickhouseClient\Client\Config(
+        parent::setUp();
+
+        $config = new Config(
             ['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']],
             ['database' => $this->config['database']],
             ['user' => $this->config['user'], 'password' => $this->config['password']]
         );
 
-        $client = new \JustFuse\ClickhouseClient\Client\Client(
+        $this->client = new Client(
             $config,
-//            \JustFuse\ClickhouseClient\Client\Format\JsonFormat::class
-            \JustFuse\ClickhouseClient\Client\Format\JsonEachRowFormat::class
+            Format\JsonFormat::class
         );
+    }
 
-        $client->system('DROP TABLE IF EXISTS t');
+    public function testPing()
+    {
+        $response = $this->client->ping();
+        $this->assertEquals(
+            "Ok.\n",
+            $response->getContent()
+        );
+    }
 
-        $client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
+    public function testSystemQuery()
+    {
+        $dbs = $this->client->query('SHOW DATABASES')->getContent()['data'];
+        $this->assertTrue(is_array($dbs));
 
-        $client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
+        $found = false;
+        foreach($dbs as $db) {
+            if ($db['name'] === 'default') {
+                $found = true;
+            }
+        }
+        $this->assertTrue($found);
+    }
 
-        $client->writeRows('INSERT INTO t',
+    public function testWorkflowDefaultFormat()
+    {
+        $this->client->system('DROP TABLE IF EXISTS t');
+
+        $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
+
+        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
+
+        $this->client->writeRows('INSERT INTO t',
             [
                 ['a' => 5],
                 ['a' => 6],
@@ -44,15 +77,55 @@ class ClientTest extends DefaultTest
         fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
         rewind($stream);
 
-        $client->writeStream('INSERT INTO t', $stream);
+        $this->client->writeStream('INSERT INTO t', $stream);
 
-        $list = $client->query('SELECT * FROM t')->getContent();
+        $list = $this->client->query('SELECT * FROM t ORDER BY a ASC')->getContent();
 
-        dump($list);
+        $this->assertEquals(
+            "[{\"a\":1},{\"a\":2},{\"a\":3},{\"a\":5},{\"a\":6},{\"a\":7},{\"a\":8},{\"a\":9}]",
+            json_encode($list['data'])
+        );
 
-//        $client->system('DROP TABLE t');
+        $this->client->system('DROP TABLE t');
+    }
 
+    public function testWorkflowJsonEachRow()
+    {
+        $this->client->system('DROP TABLE IF EXISTS t');
 
-        exit;
+        $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
+
+        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)', Format\JsonEachRowFormat::class);
+
+        $this->client->writeRows('INSERT INTO t',
+            [
+                ['a' => 5],
+                ['a' => 6],
+                ['a' => 7]
+            ],
+            Format\JsonEachRowFormat::class
+        );
+
+        $stream = fopen('php://memory','r+');
+        fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
+        rewind($stream);
+
+        $this->client->writeStream(
+            'INSERT INTO t',
+            $stream,
+            Format\JsonEachRowFormat::class
+        );
+
+        $list = $this->client->query(
+            'SELECT * FROM t ORDER BY a ASC',
+            Format\JsonEachRowFormat::class
+        )->getContent();
+
+        $this->assertEquals(
+            "[{\"a\":1},{\"a\":2},{\"a\":3},{\"a\":5},{\"a\":6},{\"a\":7},{\"a\":8},{\"a\":9}]",
+            json_encode($list)
+        );
+
+        $this->client->system('DROP TABLE t');
     }
 }

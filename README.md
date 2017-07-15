@@ -22,8 +22,9 @@ Here is an example of creating a config object with default clickhouse database 
 
 ```php
 use JustFuse\ClickhouseClient\Client\Config;
+
 $config = new Config(
-    // basic connection incormatioin
+    // basic connection information
     ['host' => '127.0.0.1', 'port' => '8123', 'protocol' => 'http'],
     // settings
     ['database' => 'default'],
@@ -38,6 +39,7 @@ For example if in your workflow only the database is different.
 
 ```php
 use JustFuse\ClickhouseClient\Client\Config;
+
 $config = new Config(
     [], [ 'database' => 'my_shiny_database', 'readonly' => 1 ], []
 );
@@ -50,6 +52,7 @@ For example if we would like to set a 5 second connection timeout, we would crea
 
 ```php
 use JustFuse\ClickhouseClient\Client\Config;
+
 $config = new Config(
     [], [ 'database' => 'my_shiny_database' ], [], [ CURLOPT_TIMEOUT => 5 ]
 );
@@ -87,7 +90,7 @@ $response->getHttpCode();
 
 Each client query returns a response with all the information about the connection performed and response.
 
-Response is decoded using one of the formatters. By default Format\JsonFormat is used.
+Response is decoded using one of the format classes. By default Format\JsonFormat is used.
 
 NOTE: all the select performed using "query" method automatically happen in readonly mode
 
@@ -226,10 +229,11 @@ $response = $this->connector->perform($request, $format);
 
 Any request the client class makes can throw an exception. 
 
-It is a good practice to check for expcetions when performing query.
+It is a good practice to check for exceptions when performing query.
  
 ```php
 use JustFuse\ClickhouseClient\Exception\Exception;
+
 try {
     $client->ping();
 } catch (Exception $ex) {

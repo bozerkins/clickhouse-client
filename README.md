@@ -16,7 +16,7 @@ composer require justfuse/clickhouse-client
 First you would need to create a client and configurations objects.
 
 
-### Config
+### Passing configurations
 
 Here is an example of creating a config object with default clickhouse database configurations.
 
@@ -71,7 +71,7 @@ use JustFuse\ClickhouseClient\Client\Format;
 $client= new Client($config);
 ```
 
-#### Client - fetching data
+#### Fetching data
 
 To perform a query, we would need to call a "query" method.
 
@@ -94,7 +94,7 @@ Response is decoded using one of the format classes. By default Format\JsonForma
 
 > NOTE: all the select performed using "query" method automatically happen in readonly mode
 
-#### Client - managing database schema and more
+#### Managing database schema and more
 
 Client object supports system queries. Such queries can manage database schema, processes and more.
 
@@ -109,7 +109,7 @@ $client->system('KILL QUERY WHERE query_id = "SOME-QUERY-ID"');
 
 In case of failure to perform the operation client throws an Exception.
 
-#### Client - writeing data
+#### Writing data
 
 There are 3 ways of writing data to Clickhouse Database: 
 
@@ -118,7 +118,7 @@ There are 3 ways of writing data to Clickhouse Database:
 3. streaming data from a file or other stream
 
 
-#### Client - write data using sql
+#### Writing data using SQL
 
 The simplest way of inserting your data into the database.
 
@@ -127,7 +127,7 @@ The simplest way of inserting your data into the database.
 $client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
 ```
 
-#### Client - write data using one of the format classes
+#### Writing data using one of the format classes
 
 This approach is a bit trickier, but generally does not require an explicit data escaping policy.
 
@@ -145,7 +145,7 @@ $this->client->writeRows('INSERT INTO t',
 );
 ```
 
-#### Client - write data using stream
+#### Writing data using streams
 
 This approach is even more tricky, as your data in the file should correspond to the formatting class you chose.
 Though, it is the fastest (and cheapest) way of getting data into Clickhouse Database via http client. 
@@ -164,7 +164,7 @@ $this->client->writeStream(
 );
 ```
 
-#### Client - ping
+#### Database ping
 
 Clickhouse Database supports a ping method, yay. So this client supports it as well.
 

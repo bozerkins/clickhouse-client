@@ -9,6 +9,7 @@
 namespace JustFuse\ClickhouseClient\Connector;
 
 
+use JustFuse\ClickhouseClient\Client\Format\FormatInterface;
 use JustFuse\ClickhouseClient\Exception\Exception;
 
 class Connector
@@ -19,17 +20,18 @@ class Connector
     /**
      * @param Config $config
      */
-    public function setConfig(Config $config)
+    public function __construct(Config $config)
     {
         $this->config = $config;
     }
 
     /**
      * @param Request $request
+     * @param FormatInterface|null $format
      * @return Response
      * @throws Exception
      */
-    public function perform(Request $request) : Response
+    public function perform(Request $request, FormatInterface $format = null) : Response
     {
         // create curl resource
         $ch = curl_init();
@@ -75,13 +77,13 @@ class Connector
         // $output contains the output string
         $output = curl_exec($ch);
         // create response
-        $response = new Response($output, curl_getinfo($ch));
+        $response = new Response($output, curl_getinfo($ch), $format);
         // close curl resource to free up system resources
         curl_close($ch);
 
         // process error
         if ($response->getHttpCode() !== 200) {
-            throw new Exception($response->getOutput(), $this->config, $request, $response);
+            throw new Exception($response->getContent(), $this->config, $request, $response);
         }
 
         // return proper response

@@ -71,7 +71,7 @@ use JustFuse\ClickhouseClient\Client\Format;
 $client= new Client($config);
 ```
 
-### Client - fetching data
+#### Client - fetching data
 
 To perform a query, we would need to call a "query" method.
 
@@ -92,9 +92,9 @@ Each client query returns a response with all the information about the connecti
 
 Response is decoded using one of the format classes. By default Format\JsonFormat is used.
 
-NOTE: all the select performed using "query" method automatically happen in readonly mode
+> NOTE: all the select performed using "query" method automatically happen in readonly mode
 
-### Client - managing database schema and more
+#### Client - managing database schema and more
 
 Client object supports system queries. Such queries can manage database schema, processes and more.
 
@@ -109,7 +109,7 @@ $client->system('KILL QUERY WHERE query_id = "SOME-QUERY-ID"');
 
 In case of failure to perform the operation client throws an Exception.
 
-### Client - write data
+#### Client - writeing data
 
 There are 3 ways of writing data to Clickhouse Database: 
 
@@ -164,7 +164,7 @@ $this->client->writeStream(
 );
 ```
 
-### Client - ping
+#### Client - ping
 
 Clickhouse Database supports a ping method, yay. So this client supports it as well.
 
@@ -225,7 +225,7 @@ $request->setGet([ 'query' => 'SELECT 1 FORMAT ' . $format->format(false) ]);
 $response = $this->connector->perform($request, $format);
 ```
 
-### Exception handling
+## Exception handling
 
 Any request the client class makes can throw an exception. 
 
@@ -248,11 +248,11 @@ try {
 }
 ```
 
-### Tests
+## Tests
 
 Well, we have got some. They do not fail, and fairly work most of the time.
 
-### Support
+## Support
 
 How much do we care?
 Enough to leave an email just here: <a href="b.ozerkins@gmail.com">b.ozerkins@gmail.com</a>

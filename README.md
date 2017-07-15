@@ -131,7 +131,20 @@ $client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
 
 This approach is a bit trickier, but generally does not require an explicit data escaping policy.
 
-By default the client object uses "Format\JsonFormat" class, but you can pass any other of the formats as an argument.
+By default the client object uses "Format\JsonFormat" class. 
+
+```php
+# write data to a table
+$this->client->writeRows('INSERT INTO t',
+    [
+        ['a' => 5],
+        ['a' => 6],
+        ['a' => 7]
+    ]
+);
+```
+
+But you can pass any other of the formats as an argument.
 
 ```php
 # write data to a table
@@ -159,8 +172,7 @@ rewind($stream);
 
 $this->client->writeStream(
     'INSERT INTO t',
-    $stream,
-    Format\JsonEachRowFormat::class
+    $stream
 );
 ```
 

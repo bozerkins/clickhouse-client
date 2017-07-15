@@ -52,7 +52,7 @@ class ConfigTest extends DefaultTest
         );
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessageRegExp('/^Operation timed out after 30 milliseconds with/');
+        $this->expectExceptionMessageRegExp('/^Operation timed out after \d+ milliseconds with/');
 
         $client = new Client($config, JsonFormat::class);
         $client->query('SELECT * FROM system.numbers LIMIT 100000000');

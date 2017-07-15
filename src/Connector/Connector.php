@@ -36,6 +36,11 @@ class Connector
         // create curl resource
         $ch = curl_init();
 
+        // set default curl options
+        foreach($this->config->getDefaultCurlOptions() as $key => $option) {
+            curl_setopt($ch, $key, $option);
+        }
+
         // set url
         curl_setopt(
             $ch,
@@ -83,10 +88,16 @@ class Connector
         $output = curl_exec($ch);
         // create response
         $response = new Response($output, curl_getinfo($ch), $format);
+
+        // process curl error
+        $curlError = curl_error($ch);
+        $curlErrno = curl_errno($ch);
+        if ($curlError || $curlErrno) {
+            throw new Exception($curlError . ':' . $curlErrno, $this->config, $request, $response);
+        }
         // close curl resource to free up system resources
         curl_close($ch);
-
-        // process error
+        // process http error
         if ($response->getHttpCode() !== 200) {
             if ($response->getHttpCode() === 0 && empty($output)) {
                 throw new Exception('Could not connect', $this->config, $request, $response);

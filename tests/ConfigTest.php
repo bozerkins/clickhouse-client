@@ -47,11 +47,13 @@ class ConfigTest extends DefaultTest
         $config = new Config(
             ['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']],
             ['database' => $this->config['database']],
-            ['user' => $this->config['user'], 'password' => $this->config['password']]
+            ['user' => $this->config['user'], 'password' => $this->config['password']],
+            [CURLOPT_TIMEOUT_MS => 30]
         );
 
-//        $this->expectException(Exception::class);
-//        $this->expectExceptionMessage('Code: 193, e.displayText() = DB::Exception: Wrong password for user default, e.what() = DB::Exception');
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessageRegExp('/^Operation timed out after 30 milliseconds with/');
+
         $client = new Client($config, JsonFormat::class);
         $client->query('SELECT * FROM system.numbers LIMIT 100000000');
     }

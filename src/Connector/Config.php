@@ -20,6 +20,8 @@ class Config
     private $user = 'default';
     /** @var  string */
     private $password = '';
+    /** @var  array */
+    private $defaultCurlOptions = [];
 
     /**
      * @return string
@@ -99,5 +101,21 @@ class Config
     public function setPassword(string $password)
     {
         $this->password = $password;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaultCurlOptions(): array
+    {
+        return $this->defaultCurlOptions;
+    }
+
+    /**
+     * @param array $defaultCurlOptions
+     */
+    public function setDefaultCurlOptions(array $defaultCurlOptions)
+    {
+        $this->defaultCurlOptions = $defaultCurlOptions;
     }
 }

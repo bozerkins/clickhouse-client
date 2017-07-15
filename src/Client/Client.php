@@ -40,6 +40,9 @@ class Client
         $connectorConfig->setProtocol($this->config->getBasics()['protocol']);
         $connectorConfig->setUser($this->config->getCredentials()['user']);
         $connectorConfig->setPassword($this->config->getCredentials()['password']);
+        if ($this->config->getCurlOptions()) {
+            $connectorConfig->setDefaultCurlOptions($this->config->getCurlOptions());
+        }
 
         $this->connector = new Connector($connectorConfig);
 

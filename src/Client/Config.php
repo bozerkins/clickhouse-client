@@ -18,26 +18,33 @@ class Config
     private $settings;
     /** @var  array */
     private $credentials;
+    /** @var  array */
+    private $curlOptions;
 
     /**
      * Config constructor.
      * @param array $basics
      * @param array $settings
      * @param array $credentials
+     * @param array $curlOptions
      */
-    public function __construct(array $basics, array $settings = [], array $credentials = [])
+    public function __construct(array $basics, array $settings = [], array $credentials = [], array $curlOptions = [])
     {
+        // resolve basic options
         $resolver = new OptionsResolver();
         $this->configureBasicOptions($resolver);
         $this->basics = $resolver->resolve($basics);
 
-        $resolver = new OptionsResolver();
-        $this->configureSettings($resolver);
-        $this->settings = $resolver->resolve($settings);
-
+        // resolve credentials
         $resolver = new OptionsResolver();
         $this->configureCredentials($resolver);
         $this->credentials = $resolver->resolve($credentials);
+
+        // set settings
+        $this->settings = $settings;
+
+        // set curl options
+        $this->curlOptions = $curlOptions;
     }
 
     /**
@@ -68,11 +75,8 @@ class Config
     /**
      * @param OptionsResolver $resolver
      */
-    private function configureSettings(OptionsResolver $resolver)
+    private function configureCurlOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults([
-            'database' => 'default'
-        ]);
     }
 
     /**
@@ -122,5 +126,13 @@ class Config
     public function getCredentials(): array
     {
         return $this->credentials;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCurlOptions(): array
+    {
+        return $this->curlOptions;
     }
 }

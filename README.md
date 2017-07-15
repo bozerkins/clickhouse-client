@@ -163,12 +163,23 @@ $this->client->writeRows('INSERT INTO t',
 This approach is even more tricky, as your data in the file should correspond to the formatting class you chose.
 Though, it is the fastest (and cheapest) way of getting data into Clickhouse Database via http client. 
 
-A stream can be anything. In this example we are using memory stream, but we can actually get a file handler and pass it into insert method instead.
+A stream can be anything. In this example we are using memory stream. 
 
 ```php
 $stream = fopen('php://memory','r+');
 fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
 rewind($stream);
+
+$this->client->writeStream(
+    'INSERT INTO t',
+    $stream
+);
+```
+
+But we can actually get a file handler and pass it into insert method instead.
+
+```php
+$stream = fopen('my/local/file.lines.json','r');
 
 $this->client->writeStream(
     'INSERT INTO t',

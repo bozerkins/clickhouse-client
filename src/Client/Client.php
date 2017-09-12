@@ -43,25 +43,48 @@ class Client
         if ($this->config->getCurlOptions()) {
             $connectorConfig->setDefaultCurlOptions($this->config->getCurlOptions());
         }
-
         $this->connector = new Connector($connectorConfig);
 
-        $this->validateFormatClass($defaultFormatClass);
-
-        $this->format = new $defaultFormatClass();
+        $this->format = null;
+        if ($defaultFormatClass) {
+            $this->isValidFormatClass($defaultFormatClass);
+            $this->format = new $defaultFormatClass();
+        }
     }
 
-    private function validateFormatClass(string $formatClass)
+    /**
+     * @param string $formatClass
+     * @throws \Exception
+     */
+    private function isValidFormatClass(string $formatClass)
     {
         if (!in_array(FormatInterface::class, class_implements($formatClass))) {
             throw new \Exception('Default format class received (' . $formatClass . ') does not implement ' . FormatInterface::class);
         }
     }
 
+    /**
+     * @param string|null $formatClass
+     * @return FormatInterface
+     */
+    private function defineFormat(string $formatClass = null)
+    {
+        if ($formatClass) {
+            $this->isValidFormatClass($formatClass);
+            return new $formatClass;
+        }
+        return new $this->format;
+    }
+
+    /**
+     * @return \ClickhouseClient\Connector\Response
+     */
     public function ping()
     {
-        // make an empty request
-        return $this->connector->perform(new Request());
+        $response = $this->connector->performRequest(
+            $this->connector->createResource()
+        );
+        return $response;
     }
 
     /**
@@ -71,97 +94,161 @@ class Client
      */
     public function query(string $sql, string $formatClass = null)
     {
-        // set default format
-        $format = $this->format;
-
-        // check if custom format received
-        if ($formatClass) {
-            $this->validateFormatClass($formatClass);
-            $format = new $formatClass;
-        }
+        $format = $this->defineFormat($formatClass);
 
         // add format to SQL
         $sql = rtrim(trim($sql), ';');
-        $sql .= ' FORMAT ' . $format->format(false);
+        $sql .= ' FORMAT ' . $format->queryFormat();
 
-        // make a request
-        $request = new Request();
-        $request->setGet(
+        $response = $this->connector->performRequest(
+            $this->connector->createResource(
+                array_merge(
+                    $this->config->getSettings(),
+                    ['query' => $sql]
+                )
+            )
+        );
+
+        $response->setFormat($format);
+
+        return $response;
+    }
+
+    public function queryStream(string $sql, $stream, string $formatClass = null)
+    {
+        $format = $this->defineFormat($formatClass);
+
+        // add format to SQL
+        $sql = rtrim(trim($sql), ';');
+        $sql .= ' FORMAT ' . $format->queryFormat();
+
+        $ch = $this->connector->createResource(
             array_merge(
                 $this->config->getSettings(),
                 ['query' => $sql]
             )
         );
 
-        // return response
-        return $this->connector->perform($request, $format);
+        //give curl the file pointer so that it can write to it
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_FILE, $stream);
+
+        $response = $this->connector->performRequest($ch);
+
+        return $response;
+
+    }
+
+    public function queryClosure(string $sql, \Closure $closure, string $formatClass = null)
+    {
+        $format = $this->defineFormat($formatClass);
+
+        // add format to SQL
+        $sql = rtrim(trim($sql), ';');
+        $sql .= ' FORMAT ' . $format->queryFormat();
+
+        $ch = $this->connector->createResource(
+            array_merge(
+                $this->config->getSettings(),
+                ['query' => $sql]
+            )
+        );
+
+        $buffer = '';
+
+        //give curl the file pointer so that it can write to it
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($curl, $str) use ($closure, &$buffer) {
+
+            // explode lines into array
+            $lines = explode("\n", $buffer . $str);
+
+            // get last element
+            $lastLine = end($lines);
+
+            // check if is normat string
+            if (substr($lastLine, -1) !== "\n") {
+                // remove from lines array
+                array_pop($lines);
+                // add to buffer
+                $buffer = $lastLine;
+            } else {
+                // clear buffer
+                $buffer = '';
+            }
+
+            foreach($lines as $line) {
+                $closure($line);
+            }
+
+            return strlen($str);
+        });
+
+        $response = $this->connector->performRequest($ch);
+
+        return $response;
     }
 
     public function writePlain(string $sql)
     {
-        $request = new Request();
-        $request->setGet($this->config->getSettings());
-        $request->setPostRaw($sql);
-
-        return $this->connector->perform($request);
+        $response = $this->connector->performRequest(
+            $this->connector->createPostRawResource(
+                $this->config->getSettings(),
+                $sql
+            )
+        );
+        return $response;
     }
 
     public function writeRows(string $sql, array $rows, string $formatClass = null)
     {
         // set default format
-        $format = $this->format;
-
-        // check if custom format received
-        if ($formatClass) {
-            $this->validateFormatClass($formatClass);
-            $format = new $formatClass;
-        }
+        $format = $this->defineFormat($formatClass);
 
         // add format to SQL
         $sql = rtrim(trim($sql), ';');
-        $sql .= ' FORMAT ' . $format->format(true);
+        $sql .= ' FORMAT ' . $format->insertFormat();
 
-        $request = new Request();
-        $request->setGet(
-            array_merge(
-                $this->config->getSettings(),
-                ['query' => $sql]
-            )
-        );
+        // encode rows
         $rowsEncoded = '';
         foreach($rows as $row) {
             $rowsEncoded .= $this->format->encode($row) . PHP_EOL;
         }
-        $request->setPostRaw($rowsEncoded);
 
-        return $this->connector->perform($request);
+        $response = $this->connector->performRequest(
+            $this->connector->createPostRawResource(
+                array_merge(
+                    $this->config->getSettings(),
+                    ['query' => $sql]
+                ),
+                $rowsEncoded
+            )
+        );
+        return $response;
     }
 
     public function writeStream(string $sql, $resource, string $formatClass = null)
     {
         // set default format
-        $format = $this->format;
-
-        // check if custom format received
-        if ($formatClass) {
-            $this->validateFormatClass($formatClass);
-            $format = new $formatClass;
-        }
+        $format = $this->defineFormat($formatClass);
 
         // add format to SQL
         $sql = rtrim(trim($sql), ';');
-        $sql .= ' FORMAT ' . $format->format(true);
+        $sql .= ' FORMAT ' . $format->insertFormat();
 
-        $request = new Request();
-        $request->setGet(
-            array_merge(
-                $this->config->getSettings(),
-                ['query' => $sql]
+        $response = $this->connector->performRequest(
+            $this->connector->createPostStreamResource(
+                array_merge(
+                    $this->config->getSettings(),
+                    ['query' => $sql]
+                ),
+                $resource
             )
         );
-        $request->setPostStream($resource);
 
-        return $this->connector->perform($request);
+        return $response;
     }
 
     /**
@@ -170,10 +257,12 @@ class Client
      */
     public function system(string $sql)
     {
-        $request = new Request();
-        $request->setGet($this->config->getSettings());
-        $request->setPostRaw($sql);
-
-        return $this->connector->perform($request);
+        $response = $this->connector->performRequest(
+            $this->connector->createPostRawResource(
+                $this->config->getSettings(),
+                $sql
+            )
+        );
+        return $response;
     }
 }

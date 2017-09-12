@@ -6,12 +6,12 @@
  * Time: 2:55 PM
  */
 
-namespace JustFuse\ClickhouseClient\Exception;
+namespace ClickhouseClient\Exception;
 
 
-use JustFuse\ClickhouseClient\Connector\Config;
-use JustFuse\ClickhouseClient\Connector\Request;
-use JustFuse\ClickhouseClient\Connector\Response;
+use ClickhouseClient\Connector\Config;
+use ClickhouseClient\Connector\Request;
+use ClickhouseClient\Connector\Response;
 use Throwable;
 
 class Exception extends \Exception

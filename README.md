@@ -8,7 +8,7 @@ allowing you to use maximum of the <a href="https://clickhouse.yandex/">Clickhou
 Basic installation with <a href="https://getcomposer.org/download/">composer</a>
 
 ```shell
-composer require justfuse/clickhouse-client
+composer require bozerkins/clickhouse-client
 ```
 
 ## Usage examples
@@ -21,7 +21,7 @@ First you would need to create a client and configurations objects.
 Here is an example of creating a config object with default clickhouse database configurations.
 
 ```php
-use JustFuse\ClickhouseClient\Client\Config;
+use ClickhouseClient\Client\Config;
 
 $config = new Config(
     // basic connection information
@@ -38,7 +38,7 @@ You do not need do define all of this in case you are using default configuratio
 For example if in your workflow only the database is different.
 
 ```php
-use JustFuse\ClickhouseClient\Client\Config;
+use ClickhouseClient\Client\Config;
 
 $config = new Config(
     [], [ 'database' => 'my_shiny_database', 'readonly' => 1 ], []
@@ -51,7 +51,7 @@ If you wish to control query execution more closely, you can pass a 4th paramete
 For example if we would like to set a 5 second connection timeout, we would create a following config:
 
 ```php
-use JustFuse\ClickhouseClient\Client\Config;
+use ClickhouseClient\Client\Config;
 
 $config = new Config(
     [], [ 'database' => 'my_shiny_database' ], [], [ CURLOPT_TIMEOUT => 5 ]
@@ -65,8 +65,8 @@ Full list of supported constants can be found in <a href="http://php.net/manual/
 Creating a client is fairly simple.
 
 ```php
-use JustFuse\ClickhouseClient\Client\Client;
-use JustFuse\ClickhouseClient\Client\Format;
+use ClickhouseClient\Client\Client;
+use ClickhouseClient\Client\Format;
 
 $client= new Client($config);
 ```
@@ -208,10 +208,10 @@ This is a simple wrapper on php-curl library and some other stuff.
 How to use it:
 
 ```php
-use JustFuse\ClickhouseClient\Connector\Config;
-use JustFuse\ClickhouseClient\Connector\Connector;
-use JustFuse\ClickhouseClient\Connector\Request;
-use JustFuse\ClickhouseClient\Client\Format;
+use ClickhouseClient\Connector\Config;
+use ClickhouseClient\Connector\Connector;
+use ClickhouseClient\Connector\Request;
+use ClickhouseClient\Client\Format;
 
 # create connector config (which is much simplier that the previous one)
 $config = new Config();
@@ -255,7 +255,7 @@ Any request the client class makes can throw an exception.
 It is a good practice to check for exceptions when performing query.
  
 ```php
-use JustFuse\ClickhouseClient\Exception\Exception;
+use ClickhouseClient\Exception\Exception;
 
 try {
     $client->ping();

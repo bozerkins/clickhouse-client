@@ -6,12 +6,12 @@
  * Time: 5:57 PM
  */
 
-namespace JustFuse\ClickhouseClient\Tests;
+namespace ClickhouseClient\Tests;
 
-use JustFuse\ClickhouseClient\Client\Client;
-use JustFuse\ClickhouseClient\Client\Config;
-use JustFuse\ClickhouseClient\Client\Format\JsonFormat;
-use JustFuse\ClickhouseClient\Exception\Exception;
+use ClickhouseClient\Client\Client;
+use ClickhouseClient\Client\Config;
+use ClickhouseClient\Client\Format\JsonFormat;
+use ClickhouseClient\Exception\Exception;
 use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends DefaultTest

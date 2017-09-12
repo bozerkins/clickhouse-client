@@ -6,7 +6,7 @@
  * Time: 4:33 PM
  */
 
-namespace JustFuse\ClickhouseClient\Client\Format;
+namespace ClickhouseClient\Client\Format;
 
 
 interface FormatInterface

@@ -6,12 +6,12 @@
  * Time: 5:51 PM
  */
 
-namespace JustFuse\ClickhouseClient\Tests;
+namespace ClickhouseClient\Tests;
 
-use JustFuse\ClickhouseClient\Client\Format\JsonFormat;
-use JustFuse\ClickhouseClient\Connector\Config;
-use JustFuse\ClickhouseClient\Connector\Connector;
-use JustFuse\ClickhouseClient\Connector\Request;
+use ClickhouseClient\Client\Format\JsonFormat;
+use ClickhouseClient\Connector\Config;
+use ClickhouseClient\Connector\Connector;
+use ClickhouseClient\Connector\Request;
 use PHPUnit\Framework\TestCase;
 
 class ConnectorTest extends DefaultTest

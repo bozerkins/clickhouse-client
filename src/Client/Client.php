@@ -6,13 +6,13 @@
  * Time: 4:00 PM
  */
 
-namespace JustFuse\ClickhouseClient\Client;
+namespace ClickhouseClient\Client;
 
 
-use JustFuse\ClickhouseClient\Client\Format\FormatInterface;
-use JustFuse\ClickhouseClient\Client\Format\JsonFormat;
-use JustFuse\ClickhouseClient\Connector\Connector;
-use JustFuse\ClickhouseClient\Connector\Request;
+use ClickhouseClient\Client\Format\FormatInterface;
+use ClickhouseClient\Client\Format\JsonFormat;
+use ClickhouseClient\Connector\Connector;
+use ClickhouseClient\Connector\Request;
 
 class Client
 {
@@ -34,7 +34,7 @@ class Client
     {
         $this->config = $config;
 
-        $connectorConfig = new \JustFuse\ClickhouseClient\Connector\Config();
+        $connectorConfig = new \ClickhouseClient\Connector\Config();
         $connectorConfig->setHost($this->config->getBasics()['host']);
         $connectorConfig->setPort($this->config->getBasics()['port']);
         $connectorConfig->setProtocol($this->config->getBasics()['protocol']);
@@ -67,7 +67,7 @@ class Client
     /**
      * @param string $sql
      * @param string|null $formatClass
-     * @return \JustFuse\ClickhouseClient\Connector\Response
+     * @return \ClickhouseClient\Connector\Response
      */
     public function query(string $sql, string $formatClass = null)
     {
@@ -166,7 +166,7 @@ class Client
 
     /**
      * @param string $sql
-     * @return \JustFuse\ClickhouseClient\Connector\Response
+     * @return \ClickhouseClient\Connector\Response
      */
     public function system(string $sql)
     {

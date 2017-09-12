@@ -6,7 +6,7 @@
  * Time: 4:00 PM
  */
 
-namespace JustFuse\ClickhouseClient\Client;
+namespace ClickhouseClient\Client;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
 

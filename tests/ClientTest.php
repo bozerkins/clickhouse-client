@@ -6,11 +6,11 @@
  * Time: 5:52 PM
  */
 
-namespace JustFuse\ClickhouseClient\Tests;
+namespace ClickhouseClient\Tests;
 
-use JustFuse\ClickhouseClient\Client\Client;
-use JustFuse\ClickhouseClient\Client\Config;
-use JustFuse\ClickhouseClient\Client\Format;
+use ClickhouseClient\Client\Client;
+use ClickhouseClient\Client\Config;
+use ClickhouseClient\Client\Format;
 use PHPUnit\Framework\TestCase;
 
 class ClientTest extends DefaultTest

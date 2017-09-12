@@ -6,11 +6,11 @@
  * Time: 1:35 PM
  */
 
-namespace JustFuse\ClickhouseClient\Connector;
+namespace ClickhouseClient\Connector;
 
 
-use JustFuse\ClickhouseClient\Client\Format\FormatInterface;
-use JustFuse\ClickhouseClient\Exception\Exception;
+use ClickhouseClient\Client\Format\FormatInterface;
+use ClickhouseClient\Exception\Exception;
 
 class Connector
 {

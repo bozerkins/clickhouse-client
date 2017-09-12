@@ -6,7 +6,7 @@
  * Time: 1:43 PM
  */
 
-namespace JustFuse\ClickhouseClient\Connector;
+namespace ClickhouseClient\Connector;
 
 
 class Request

@@ -6,9 +6,9 @@
  * Time: 1:44 PM
  */
 
-namespace JustFuse\ClickhouseClient\Connector;
+namespace ClickhouseClient\Connector;
 
-use JustFuse\ClickhouseClient\Client\Format\FormatInterface;
+use ClickhouseClient\Client\Format\FormatInterface;
 
 class Response
 {

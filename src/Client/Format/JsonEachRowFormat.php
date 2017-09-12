@@ -6,7 +6,7 @@
  * Time: 4:46 PM
  */
 
-namespace JustFuse\ClickhouseClient\Client\Format;
+namespace ClickhouseClient\Client\Format;
 
 
 class JsonEachRowFormat implements FormatInterface

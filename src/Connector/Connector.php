@@ -25,13 +25,7 @@ class Connector
         $this->config = $config;
     }
 
-    /**
-     * @param Request $request
-     * @param FormatInterface|null $format
-     * @return Response
-     * @throws Exception
-     */
-    public function perform(Request $request, FormatInterface $format = null) : Response
+    public function createResource(array $query = [])
     {
         // create curl resource
         $ch = curl_init();
@@ -50,33 +44,9 @@ class Connector
                 $this->config->getProtocol(),
                 $this->config->getHost(),
                 $this->config->getPort(),
-                ($request->hasGet() ? '?' . http_build_query($request->accessGet()) : '')
+                ($query ? '?' . http_build_query($query) : '')
             )
         );
-
-        // set post parameters
-        if ($request->hasPost() || $request->hasPostRaw() || $request->hasPostStream()) {
-            $postQuery = '';
-            if ($request->hasPostStream()) {
-                curl_setopt($ch, CURLOPT_UPLOAD, 1);
-                curl_setopt($ch, CURLOPT_INFILE, $request->getPostStream());
-                curl_setopt($ch, CURLOPT_INFILESIZE, ftell($request->getPostStream()));
-            }
-            if ($request->hasPostRaw()) {
-                $postQuery = $request->accessPostRaw();
-            }
-            if ($request->hasPost()) {
-                $postQuery = http_build_query($request->accessPost());
-            }
-
-            curl_setopt($ch, CURLOPT_POST, 1);
-            if ($postQuery !== '') {
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $postQuery);
-            }
-        }
-
-        //return the transfer as a string
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
         // set headers
         $headers = [];
@@ -84,25 +54,55 @@ class Connector
         $headers[] = "X-ClickHouse-Key: " . $this->config->getPassword();
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
+        //return the transfer as a string
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        return $ch;
+    }
+
+    public function createPostRawResource(array $query, string $post)
+    {
+        $ch = $this->createResource($query);
+
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+
+        return $ch;
+    }
+
+    public function createPostStreamResource(array $query, $resource)
+    {
+        $ch = $this->createResource($query);
+
+        curl_setopt($ch, CURLOPT_UPLOAD, true);
+        curl_setopt($ch, CURLOPT_INFILE, $resource);
+        curl_setopt($ch, CURLOPT_INFILESIZE, ftell($resource));
+        curl_setopt($ch, CURLOPT_POST, true);
+
+        return $ch;
+    }
+
+    public function performRequest($resource, FormatInterface $format = null)
+    {
         // $output contains the output string
-        $output = curl_exec($ch);
+        $output = curl_exec($resource);
         // create response
-        $response = new Response($output, curl_getinfo($ch), $format);
+        $response = new Response($output, curl_getinfo($resource), $format);
 
         // process curl error
-        $curlError = curl_error($ch);
-        $curlErrno = curl_errno($ch);
+        $curlError = curl_error($resource);
+        $curlErrno = curl_errno($resource);
         if ($curlError || $curlErrno) {
-            throw new Exception($curlError . ':' . $curlErrno, $this->config, $request, $response);
+            throw new Exception($curlError . ':' . $curlErrno, $this->config, $response);
         }
         // close curl resource to free up system resources
-        curl_close($ch);
+        curl_close($resource);
         // process http error
         if ($response->getHttpCode() !== 200) {
             if ($response->getHttpCode() === 0 && empty($output)) {
-                throw new Exception('Could not connect', $this->config, $request, $response);
+                throw new Exception('Could not connect', $this->config, $response);
             }
-            throw new Exception($output, $this->config, $request, $response);
+            throw new Exception($output, $this->config, $response);
         }
 
         // return proper response

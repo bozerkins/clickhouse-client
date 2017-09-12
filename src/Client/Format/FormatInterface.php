@@ -12,12 +12,18 @@ namespace ClickhouseClient\Client\Format;
 interface FormatInterface
 {
     /**
-     * Returns format which is one of the database supported formats
+     * Returns format used for getting data from database
      *
-     * @param bool $forInsert
      * @return string
      */
-    public function format(bool $forInsert) : string;
+    public function queryFormat() : string;
+
+    /**
+     * Returns format used for inserting data into database
+     *
+     * @return string
+     */
+    public function insertFormat() : string;
 
     /**
      * Encode single row of data

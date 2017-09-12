@@ -2,71 +2,33 @@
 /**
  * Created by PhpStorm.
  * User: bogdans
- * Date: 7/15/17
- * Time: 1:44 PM
+ * Date: 9/12/17
+ * Time: 10:32 PM
  */
 
 namespace ClickhouseClient\Connector;
+
 
 use ClickhouseClient\Client\Format\FormatInterface;
 
 class Response
 {
     /** @var  string */
-    private $content;
-
+    private $output;
     /** @var  array */
-    private $details;
-
+    private $curlinfo;
     /** @var  FormatInterface|null */
     private $format;
 
     /**
      * Response constructor.
-     * @param string $content
-     * @param array $details
-     * @param FormatInterface|null $format
+     * @param $output
+     * @param $curlinfo
      */
-    public function __construct(string $content, array $details, FormatInterface $format = null)
+    public function __construct(string $output, array $curlinfo)
     {
-        $this->setContent($content);
-        $this->setDetails($details);
-        $this->setFormat($format);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getContent()
-    {
-        if ($this->hasFormat()) {
-            return $this->getFormat()->decode($this->content);
-        }
-        return $this->content;
-    }
-
-    /**
-     * @return string
-     */
-    public function getContentRaw() : string
-    {
-        return $this->content;
-    }
-
-    /**
-     * @param string $output
-     */
-    private function setContent(string $output)
-    {
-        $this->content = $output;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDetails(): array
-    {
-        return $this->details;
+        $this->output = $output;
+        $this->curlinfo = $curlinfo;
     }
 
     /**
@@ -74,21 +36,21 @@ class Response
      */
     public function getHttpCode() : int
     {
-        return $this->details['http_code'];
+        return $this->curlinfo['http_code'];
     }
 
     /**
-     * @param array $details
+     * @return array
      */
-    private function setDetails(array $details)
+    public function getDetails()
     {
-        $this->details = $details;
+        return $this->curlinfo;
     }
 
     /**
-     * @return FormatInterface
+     * @return FormatInterface|null
      */
-    private function getFormat() : FormatInterface
+    public function getFormat()
     {
         return $this->format;
     }
@@ -96,16 +58,27 @@ class Response
     /**
      * @param FormatInterface|null $format
      */
-    private function setFormat($format)
+    public function setFormat(FormatInterface $format = null)
     {
         $this->format = $format;
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
-    private function hasFormat()
+    public function getContent()
     {
-        return $this->format !== null;
+        if ($this->format !== null) {
+            return $this->format->decode($this->output);
+        }
+        return $this->output;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getOutput()
+    {
+        return $this->output;
     }
 }

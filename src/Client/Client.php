@@ -168,7 +168,7 @@ class Client
             // get last element
             $lastLine = end($lines);
 
-            // check if is normat string
+            // check if is normal string
             if (substr($lastLine, -1) !== "\n") {
                 // remove from lines array
                 array_pop($lines);

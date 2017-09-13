@@ -1,6 +1,9 @@
 language: php
-before_script: composer install
+before_script:
+  - composer install
 php:
   - '7.0'
   - '7.1'
   - nightly
+services:
+  - clickhouse-server

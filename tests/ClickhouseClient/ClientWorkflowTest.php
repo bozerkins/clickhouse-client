@@ -13,7 +13,7 @@ use ClickhouseClient\Client\Config;
 use ClickhouseClient\Client\Format;
 use PHPUnit\Framework\TestCase;
 
-class ClientTest extends DefaultTest
+class ClientWorkflowTest extends DefaultTest
 {
     /** @var  Client */
     protected $client;
@@ -63,7 +63,7 @@ class ClientTest extends DefaultTest
 
         $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
+        $this->client->write('INSERT INTO t VALUES (1), (2), (3)');
 
         $this->client->writeRows('INSERT INTO t',
             [
@@ -95,7 +95,7 @@ class ClientTest extends DefaultTest
 
         $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
+        $this->client->write('INSERT INTO t VALUES (1), (2), (3)');
 
         $this->client->writeRows('INSERT INTO t',
             [

@@ -191,7 +191,7 @@ class Client
         return $response;
     }
 
-    public function writePlain(string $sql)
+    public function write(string $sql)
     {
         $response = $this->connector->performRequest(
             $this->connector->createPostRawResource(

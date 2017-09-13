@@ -6,7 +6,7 @@
  * Time: 5:51 PM
  */
 
-namespace ClickhouseClient\Tests;
+namespace ClickhouseClient;
 
 use ClickhouseClient\Client\Format\JsonFormat;
 use ClickhouseClient\Connector\Config;

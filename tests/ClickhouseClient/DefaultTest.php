@@ -6,7 +6,7 @@
  * Time: 5:51 PM
  */
 
-namespace ClickhouseClient\Tests;
+namespace ClickhouseClient;
 
 use PHPUnit\Framework\TestCase;
 

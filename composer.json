@@ -11,11 +11,8 @@
   ],
   "autoload": {
     "psr-4": {
-      "ClickhouseClient\\": "src/"
+      "": "src/"
     }
-  },
-  "autoload-dev": {
-    "psr-4": { "ClickhouseClient\\Tests\\": "tests/" }
   },
   "require": {
     "php": ">=7.0.0",

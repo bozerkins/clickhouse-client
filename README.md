@@ -3,6 +3,10 @@ A simple version of clickhouse client (using <a href="https://clickhouse.yandex/
 This version provides the closest access to HTTP interface, 
 allowing you to use maximum of the <a href="https://clickhouse.yandex/">Clickhouse Database</a> capacities in your PHP applications.
 
+
+[![Build Status](https://travis-ci.org/bozerkins/clickhouse-client.svg?branch=master)](https://travis-ci.org/bozerkins/clickhouse-client)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+
 ## Installation
 
 Basic installation with <a href="https://getcomposer.org/download/">composer</a>

@@ -6,7 +6,7 @@
  * Time: 5:52 PM
  */
 
-namespace ClickhouseClient\Tests;
+namespace ClickhouseClient;
 
 use ClickhouseClient\Client\Client;
 use ClickhouseClient\Client\Config;

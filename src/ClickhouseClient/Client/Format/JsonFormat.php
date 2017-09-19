@@ -9,20 +9,8 @@
 namespace ClickhouseClient\Client\Format;
 
 
-class JsonEachRowFormat implements FormatInterface
+class JsonFormat implements FormatInterface
 {
-
-    /**
-     * Returns format which is one of the database supported formats
-     *
-     * @param bool $forInsert
-     * @return string
-     */
-    public function format(bool $forInsert): string
-    {
-        return 'JSONEachRow';
-    }
-
     /**
      * Encode single row of data
      * Generally is used for proper data inserting
@@ -44,7 +32,26 @@ class JsonEachRowFormat implements FormatInterface
      */
     public function decode(string $row): array
     {
-        $rows = explode(PHP_EOL, rtrim($row));
-        return array_map(function($row) { return json_decode($row, true); }, $rows);
+        return json_decode($row, true);
+    }
+
+    /**
+     * Returns format used for getting data from database
+     *
+     * @return string
+     */
+    public function queryFormat(): string
+    {
+        return 'JSON';
+    }
+
+    /**
+     * Returns format used for inserting data into database
+     *
+     * @return string
+     */
+    public function insertFormat(): string
+    {
+        return 'JSONEachRow';
     }
 }

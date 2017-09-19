@@ -3,6 +3,10 @@ A simple version of clickhouse client (using <a href="https://clickhouse.yandex/
 This version provides the closest access to HTTP interface, 
 allowing you to use maximum of the <a href="https://clickhouse.yandex/">Clickhouse Database</a> capacities in your PHP applications.
 
+
+[![Build Status](https://travis-ci.org/bozerkins/clickhouse-client.svg?branch=master)](https://travis-ci.org/bozerkins/clickhouse-client)
+[![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
+
 ## Installation
 
 Basic installation with <a href="https://getcomposer.org/download/">composer</a>
@@ -11,14 +15,7 @@ Basic installation with <a href="https://getcomposer.org/download/">composer</a>
 composer require bozerkins/clickhouse-client
 ```
 
-## Usage examples
-
-First you would need to create a client and configurations objects.
-
-
-### Passing configurations
-
-Here is an example of creating a config object with default clickhouse database configurations.
+## Configurations
 
 ```php
 use ClickhouseClient\Client\Config;
@@ -38,10 +35,13 @@ You do not need do define all of this in case you are using default configuratio
 For example if in your workflow only the database is different.
 
 ```php
-use ClickhouseClient\Client\Config;
-
 $config = new Config(
-    [], [ 'database' => 'my_shiny_database', 'readonly' => 1 ], []
+    // basic connection information - set to default
+    [],
+    // settings
+    [ 'database' => 'my_shiny_database', 'readonly' => 1 ]
+    // credentials - set to defauult
+    []
 );
 ```
 
@@ -54,35 +54,47 @@ For example if we would like to set a 5 second connection timeout, we would crea
 use ClickhouseClient\Client\Config;
 
 $config = new Config(
-    [], [ 'database' => 'my_shiny_database' ], [], [ CURLOPT_TIMEOUT => 5 ]
+    // basic connection information - set to default
+    [],
+    // settings
+    [ 'database' => 'my_shiny_database', 'readonly' => 1 ]
+    // credentials - set to defauult
+    [],
+    // additional CURL options
+    [ CURLOPT_TIMEOUT => 5 ]
 );
 ```
 
 Full list of supported constants can be found in <a href="http://php.net/manual/en/function.curl-setopt.php">curl_setopt function documentation</a>.
 
-### Client
+## Client
 
 Creating a client is fairly simple.
 
 ```php
 use ClickhouseClient\Client\Client;
-use ClickhouseClient\Client\Format;
 
 $client= new Client($config);
 ```
 
-#### Fetching data
+## Reading from Clickhouse
 
-To perform a query, we would need to call a "query" method.
+There are several methods for reading data from clickhouse.
+
+### Simple Query
+
+This method is primarily used for getting statistics, aggregated data from clickhouse.
 
 ```php
 # perform select
-$response = $client->query('SELECT * FROM system.numbers LIMIT 10');
-# get output (json decoded)
+$response = $client->query(
+    'SELECT * FROM system.numbers LIMIT 10'
+);
+# get decoded output - database response
+$response->getContent();
+# get raw output string - raw string received from clickhouse
 $response->getOutput();
-# get raw output string
-$response->getOutputRaw();
-# get communication details
+# get communication details - curl defails for the request
 $response->getDetails();
 # and a neat shortcut for getting http response code
 $response->getHttpCode();
@@ -90,11 +102,112 @@ $response->getHttpCode();
 
 Each client query returns a response with all the information about the connection performed and response.
 
-Response is decoded using one of the format classes. By default Format\JsonFormat is used.
+### Query data into Stream
 
-> NOTE: all the select performed using "query" method automatically happen in readonly mode
+It is possible to read data from clickhouse directly into a stream - a file for example.
 
-#### Managing database schema and more
+```php
+# create a stream - open a file
+$stream = fopen('/tmp/file-to-read-data-into', 'r+');
+# query data into the file
+$client->queryStream(
+    "SELECT * FROM system.numbers LIMIT 5", 
+    $stream
+);
+```
+
+### Query data into Closure (function-callable)
+
+This method is useful when you intend to divide one clickhouse response into several destinations.
+ 
+ ```php
+ # open file 1
+ $file1 = fopen('/tmp/file-to-read-data-into-1', 'r+');
+ # open file 2
+ $file2 = fopen('/tmp/file-to-read-data-into-2', 'r+');
+ 
+ # query data, process response with anonymous function
+ $client->queryClosure(
+    "SELECT * FROM system.numbers LIMIT 100", 
+    function($line) use ($file1, $file2) {
+        $row = json_decode($line);
+        if ($row['number'] % 2 === 0) {
+            fwrite($file1, $line . PHP_EOL);
+        } else {
+            fwrite($file2, $line . PHP_EOL);
+        }
+     }
+ );
+ ```
+
+## Writing into Clickhouse
+
+There are several ways to writing to the database as well.
+
+### Simple Insert
+
+Most common way of writing to a database. 
+
+```php
+# write data to a table
+$client->write('INSERT INTO myTable VALUES (1), (2), (3)');
+```
+
+> NOTE: clickhouse does not have escape mechanisms like MySQL / Oracle / etc. For save inserts please see other insert methods.
+
+### Rows Insert
+
+The safest and easiest way to insert data into clickhouse table is to use "writeRows" methods. 
+The method takes the table to insert data to as first parameter, and php array of rows as second.
+When inserting data, method "writeRows" encodes the data into appropriate format for clickhouse database to interpret.
+By default it is JSON format. This ensures no manual escape of data is required.
+
+```php
+# write data to a table
+$client->writeRows('INSERT INTO myTable',
+    [
+        ['number' => 5],
+        ['number' => 6],
+        ['number' => 7]
+    ]
+);
+```
+
+
+### File Insert
+
+Another way of inserting data is directly from a file. 
+ 
+> NOTE: the format of the data in the file should match the one clickhouse is expecting
+
+```php
+$stream = fopen('my/local/file.lines.json','r');
+
+$client->writeStream(
+    'INSERT INTO t',
+    $stream
+);
+```
+
+This method actually accepts data not only from a file, but from a stream.
+Thus we can import data from other places, like memory (or anything that can be represented as a stream, really).
+
+```php
+# create memory stream
+$stream = fopen('php://memory','r+');
+# write some data into it
+fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
+# rewind pointer to the beginning
+rewind($stream);
+
+# insert the data
+$client->writeStream(
+    'INSERT INTO t',
+    $stream
+);
+```
+
+## System Queries
 
 Client object supports system queries. Such queries can manage database schema, processes and more.
 
@@ -109,85 +222,47 @@ $client->system('KILL QUERY WHERE query_id = "SOME-QUERY-ID"');
 
 In case of failure to perform the operation client throws an Exception.
 
-#### Writing data
+## Formats
 
-There are 3 ways of writing data to Clickhouse Database: 
-
-1. as a simple sql query
-2. using one of the format classes
-3. streaming data from a file or other stream
-
-
-#### Writing data using SQL
-
-The simplest way of inserting your data into the database.
+There are several formats that clickhouse support. This is used for retrieving and inserting data.
+By default JSON is used. 
+When you perform simple select / insert queries data is encoded into JSON and transferred between client and clickhouse.
+This does not work for Stream / Closure queries/writes.
+When performing any query/write you can change format, by passing a class name as the last parameter.
 
 ```php
-# write data to a table
-$client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
-```
+use ClickhouseClient\Client\Format;
 
-#### Writing data using one of the format classes
+# select using default JSON format
+$client->query('SELECT * FROM system.numbers LIMIT 5');
+# select using TabSeparated format
+$client->query('SELECT * FROM system.numbers LIMIT 5', Format\TabSeparatedFormat::class);
 
-This approach is a bit trickier, but generally does not require an explicit data escaping policy.
-
-By default the client object uses "Format\JsonFormat" class. 
-
-```php
-# write data to a table
-$this->client->writeRows('INSERT INTO t',
+# insert usin JSON format
+$client->writeRows('INSERT INTO myTable',
     [
-        ['a' => 5],
-        ['a' => 6],
-        ['a' => 7]
+        ['number' => 5],
+        ['number' => 6],
+        ['number' => 7]
     ]
 );
-```
-
-But you can pass any other of the formats as an argument.
-
-```php
-# write data to a table
-$this->client->writeRows('INSERT INTO t',
+# insert usin TabSeparated format
+$client->writeRows('INSERT INTO myTable',
     [
-        ['a' => 5],
-        ['a' => 6],
-        ['a' => 7]
-    ],
-    Format\JsonEachRowFormat::class
+        ['number' => 5],
+        ['number' => 6],
+        ['number' => 7]
+    ], 
+    Format\TabSeparatedFormat::class
 );
+
+# create client with differrent default format
+$client = new Client($config, Format\TabSeparatedFormat::class);
+# create client without default format (which would result in errors in some cases)
+#client = new Client($config, null);
 ```
 
-#### Writing data using streams
-
-This approach is even more tricky, as your data in the file should correspond to the formatting class you chose.
-Though, it is the fastest (and cheapest) way of getting data into Clickhouse Database via http client. 
-
-A stream can be anything. In this example we are using memory stream. 
-
-```php
-$stream = fopen('php://memory','r+');
-fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
-rewind($stream);
-
-$this->client->writeStream(
-    'INSERT INTO t',
-    $stream
-);
-```
-
-But we can actually get a file handler and pass it into insert method instead.
-
-```php
-$stream = fopen('my/local/file.lines.json','r');
-
-$this->client->writeStream(
-    'INSERT INTO t',
-    $stream
-);
-```
-
-#### Database ping
+## Ping
 
 Clickhouse Database supports a ping method, yay. So this client supports it as well.
 
@@ -198,55 +273,6 @@ $client->ping();
 ```
 
 If you do not get an Exception out of this, that's generally a good sing.
-
-### Connector - Lower level communication
-
-For those peeps who does not like black magic of clients and would enjoy performing requests on a lower level we have Connector class.
-
-This is a simple wrapper on php-curl library and some other stuff.
-
-How to use it:
-
-```php
-use ClickhouseClient\Connector\Config;
-use ClickhouseClient\Connector\Connector;
-use ClickhouseClient\Connector\Request;
-use ClickhouseClient\Client\Format;
-
-# create connector config (which is much simplier that the previous one)
-$config = new Config();
-$config->setHost('127.0.0.1');
-$config->setPort('8123');
-$config->setProtocol('http');
-$config->setUser('default');
-$config->setPassword('my-shiny-password');
-$config->setDefaultCurlOptions(
-    [
-        CURLOPT_TIMEOUT => 5
-    ]
-);
-
-# create a connector
-$connector = new Connector($config);
-
-# create a request
-$request = new Request();
-$request->setGet(['query' => 'SELECT 1']);
-
-# perform query and get a response
-$response = $this->connector->perform($request);
-
-# we can use the same formatters from the previous section
-# we should understand how they work though
-$format = new Format\JsonFormat();
-
-# create a request using format
-$request = new Request();
-$request->setGet([ 'query' => 'SELECT 1 FORMAT ' . $format->format(false) ]);
-
-# perform query and get a response and decode it with format
-$response = $this->connector->perform($request, $format);
-```
 
 ## Exception handling
 
@@ -262,8 +288,6 @@ try {
 } catch (Exception $ex) {
     # get configurations of the connector
     $ex->getConfig();
-    # get request for the connector
-    $ex->getRequest();
     # get repsonse 
     $ex->getResponse();
     # and get the message, ofc

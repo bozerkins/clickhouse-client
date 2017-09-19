@@ -6,14 +6,14 @@
  * Time: 5:52 PM
  */
 
-namespace ClickhouseClient\Tests;
+namespace ClickhouseClient;
 
 use ClickhouseClient\Client\Client;
 use ClickhouseClient\Client\Config;
 use ClickhouseClient\Client\Format;
 use PHPUnit\Framework\TestCase;
 
-class ClientTest extends DefaultTest
+class ClientWorkflowTest extends DefaultTest
 {
     /** @var  Client */
     protected $client;
@@ -63,7 +63,7 @@ class ClientTest extends DefaultTest
 
         $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
+        $this->client->write('INSERT INTO t VALUES (1), (2), (3)');
 
         $this->client->writeRows('INSERT INTO t',
             [
@@ -95,7 +95,7 @@ class ClientTest extends DefaultTest
 
         $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writePlain('INSERT INTO t VALUES (1), (2), (3)');
+        $this->client->write('INSERT INTO t VALUES (1), (2), (3)');
 
         $this->client->writeRows('INSERT INTO t',
             [
@@ -107,7 +107,10 @@ class ClientTest extends DefaultTest
         );
 
         $stream = fopen('php://memory','r+');
-        fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
+        if (fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL ) === false) {
+            echo 'error!!!'.PHP_EOL;
+            print_r(error_get_last());
+        }
         rewind($stream);
 
         $this->client->writeStream(

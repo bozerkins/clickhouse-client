@@ -19,9 +19,6 @@ class Exception extends \Exception
     /** @var  Response */
     private $response;
 
-    /** @var  Request */
-    private $request;
-
     /** @var  Config */
     private $config;
 
@@ -29,14 +26,12 @@ class Exception extends \Exception
      * Exception constructor.
      * @param string $message
      * @param Config $config
-     * @param Request $request
      * @param Response $response
      * @param Throwable|null $previous
      */
-    public function __construct($message, Config $config, Request $request, Response $response, Throwable $previous = null)
+    public function __construct($message, Config $config, Response $response, Throwable $previous = null)
     {
         $this->config = $config;
-        $this->request = $request;
         $this->response = $response;
 
         $code = $response->getHttpCode();
@@ -49,14 +44,6 @@ class Exception extends \Exception
     public function getResponse(): Response
     {
         return $this->response;
-    }
-
-    /**
-     * @return Request
-     */
-    public function getRequest(): Request
-    {
-        return $this->request;
     }
 
     /**

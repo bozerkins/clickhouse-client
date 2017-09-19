@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/php:7.1.5-browsers
+      - image: circleci/php:7.0.18
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -17,27 +17,31 @@ jobs:
 
     steps:
       - checkout
+      - run:
+          name: Install ClickHouse
+          command: |
+            sudo apt-get install software-properties-common python-software-properties
+            sudo apt-add-repository "deb http://repo.yandex.ru/clickhouse/trusty stable main"
+            sudo apt-get update
+            sudo apt-get install clickhouse-server-common clickhouse-client -y
+            sudo sed -e "/<listen_host>::1<\/listen_host>/d" -i /etc/clickhouse-server/config.xml
+            sudo service clickhouse-server start
 
-      # Download and cache dependencies
-      - restore_cache:
-          keys:
-          - v1-dependencies-{{ checksum "composer.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
-
-      - run: composer install -n --prefer-dist
-
-      - save_cache:
-          paths:
-            - ./vendor
-          key: v1-dependencies-{{ checksum "composer.json" }}
-
-      - run: |
-          sudo apt-get install software-properties-common python-software-properties
-          sudo apt-add-repository "deb http://repo.yandex.ru/clickhouse/trusty stable main"
-          sudo apt-get update
-          sudo apt-get install clickhouse-server-common clickhouse-client -y
-          sudo service clickhouse-server start
-
-      # run tests!
-      - run: phpunit
+      - run:
+          name: Install Composer
+          command: |
+            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+            php -r "if (hash_file('SHA384', 'composer-setup.php') === trim(file_get_contents('https://composer.github.io/installer.sig'))) { echo 'Installer verified'; } else { echo 'Installer invalid'; unlink('composer-setup.php'); } echo PHP_EOL;"
+            php composer-setup.php
+            php -r "unlink('composer-setup.php');"
+      - run:
+          name: Display PHP information
+          command: |
+            php -v
+            php composer.phar --version
+      - run:
+          name: Install project dependencies
+          command: php composer.phar install
+      - run:
+          name: Run Unit tests
+          command: vendor/bin/phpunit

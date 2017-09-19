@@ -76,7 +76,6 @@ class Connector
 
         curl_setopt($ch, CURLOPT_UPLOAD, true);
         curl_setopt($ch, CURLOPT_INFILE, $resource);
-        curl_setopt($ch, CURLOPT_INFILESIZE, ftell($resource));
         curl_setopt($ch, CURLOPT_POST, true);
 
         return $ch;

@@ -107,6 +107,7 @@ class ClientWorkflowTest extends DefaultTest
         );
 
         $stream = fopen('php://memory','r+');
+        fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
         rewind($stream);
 
         $this->client->writeStream(

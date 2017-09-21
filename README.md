@@ -258,7 +258,7 @@ $client->writeRows('INSERT INTO myTable',
 # create client with differrent default format
 $client = new Client($config, Format\TabSeparatedFormat::class);
 # create client without default format (which would result in errors in some cases)
-client = new Client($config, null);
+$client = new Client($config, null);
 ```
 
 ## Ping

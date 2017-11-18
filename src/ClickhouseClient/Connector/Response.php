@@ -34,7 +34,7 @@ class Response
     /**
      * @return int
      */
-    public function getHttpCode() : int
+    public function getHttpCode(): int
     {
         return $this->curlinfo['http_code'];
     }

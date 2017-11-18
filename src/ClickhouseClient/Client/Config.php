@@ -77,6 +77,7 @@ class Config
      */
     private function configureCurlOptions(OptionsResolver $resolver)
     {
+        //todo: implement or remove this method
     }
 
     /**

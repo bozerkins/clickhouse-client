@@ -12,7 +12,6 @@ namespace ClickhouseClient\Client;
 use ClickhouseClient\Client\Format\FormatInterface;
 use ClickhouseClient\Client\Format\JsonFormat;
 use ClickhouseClient\Connector\Connector;
-use ClickhouseClient\Connector\Request;
 
 class Client
 {

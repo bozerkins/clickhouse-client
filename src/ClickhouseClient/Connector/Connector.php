@@ -31,7 +31,7 @@ class Connector
         $ch = curl_init();
 
         // set default curl options
-        foreach($this->config->getDefaultCurlOptions() as $key => $option) {
+        foreach ($this->config->getDefaultCurlOptions() as $key => $option) {
             curl_setopt($ch, $key, $option);
         }
 
@@ -86,7 +86,8 @@ class Connector
         // $output contains the output string
         $output = curl_exec($resource);
         // create response
-        $response = new Response($output, curl_getinfo($resource), $format);
+        $response = new Response($output, curl_getinfo($resource));
+        $response->setFormat($format);
 
         // process curl error
         $curlError = curl_error($resource);

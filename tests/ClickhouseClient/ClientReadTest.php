@@ -11,7 +11,6 @@ namespace ClickhouseClient;
 use ClickhouseClient\Client\Client;
 use ClickhouseClient\Client\Config;
 use ClickhouseClient\Client\Format;
-use PHPUnit\Framework\TestCase;
 
 class ClientReadTest extends DefaultTest
 {
@@ -55,7 +54,7 @@ class ClientReadTest extends DefaultTest
         rewind($stream);
 
         for ($i = 0; $i < 5; $i++) {
-            $iString = (string) $i;
+            $iString = (string)$i;
             $this->assertEquals($iString . PHP_EOL, fgets($stream));
         }
     }
@@ -63,7 +62,9 @@ class ClientReadTest extends DefaultTest
     public function testClosureQuery()
     {
         $lines = '';
-        $closure = function($line) use (&$lines) { $lines .= $line; };
+        $closure = function ($line) use (&$lines) {
+            $lines .= $line;
+        };
 
         $response = $this->client->queryClosure("SELECT * FROM system.numbers LIMIT 5", $closure, Format\JsonEachRowFormat::class);
 

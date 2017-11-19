@@ -10,7 +10,6 @@ namespace ClickhouseClient\Exception;
 
 
 use ClickhouseClient\Connector\Config;
-use ClickhouseClient\Connector\Request;
 use ClickhouseClient\Connector\Response;
 use Throwable;
 

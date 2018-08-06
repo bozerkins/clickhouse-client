@@ -20,7 +20,7 @@ jobs:
       - run:
           name: Install ClickHouse
           command: |
-            sudo apt-get install software-properties-common python-software-properties
+            sudo apt-get install software-properties-common
             sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E0C56BD4
             echo "deb http://repo.yandex.ru/clickhouse/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
             sudo apt-get update

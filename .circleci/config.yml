@@ -94,5 +94,6 @@ jobs:
 workflows:
   version: 2
   default:
-    - build-7.0
-    - build-7.1
+    jobs:
+      - build-7.0
+      - build-7.1

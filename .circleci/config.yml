@@ -13,7 +13,7 @@ jobs:
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
 
-    working_directory: ~/repo
+    working_directory: ~/repo1
 
     steps:
       - checkout
@@ -56,7 +56,7 @@ jobs:
       # CircleCI maintains a library of pre-built images
       # documented at https://circleci.com/docs/2.0/circleci-images/
 
-    working_directory: ~/repo
+    working_directory: ~/repo2
 
     steps:
       - checkout

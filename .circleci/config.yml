@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  build-7.0:
+  build:
     docker:
       # specify the version you desire here
       - image: circleci/php:7.0-jessie-node-browsers

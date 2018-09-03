@@ -4,7 +4,7 @@
 #
 version: 2
 jobs:
-  build:
+  build-7.0:
     docker:
       # specify the version you desire here
       - image: circleci/php:7.0-jessie-node-browsers
@@ -90,3 +90,9 @@ jobs:
       - run:
           name: Run Unit tests
           command: vendor/bin/phpunit
+
+workflows:
+  version: 2
+  default:
+    - build-7.0
+    - build-7.1

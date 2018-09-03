@@ -1,7 +1,7 @@
 # Clickhouse Client
 A simple version of clickhouse client (using <a href="https://clickhouse.yandex/docs/en/interfaces/http_interface.html">HTTP interface</a>). 
 This version provides the closest access to HTTP interface, 
-allowing you to use maximum of the <a href="https://clickhouse.yandex/">Clickhouse Database</a> capacities in your PHP applications.
+allowing you to use maximum of the <a href="https://clickhouse.yandex/">Clickhouse Database</a> capabilities in your PHP applications.
 
 [![CircleCI](https://circleci.com/gh/bozerkins/clickhouse-client/tree/master.svg?style=shield)](https://circleci.com/gh/bozerkins/clickhouse-client/tree/master)
 [![MIT Licence](https://badges.frapsoft.com/os/mit/mit.svg?v=103)](https://opensource.org/licenses/mit-license.php)
@@ -28,10 +28,13 @@ $config = new Config(
     ['user' => 'default', 'password' => '']
 );
 ```
-If you wish to use Clickhouse settings, for example create a client only in readonly mode, you can pass settings as 2nd parameter, along with database name.
+You can pass additional settings in 2nd parameter, along with database name.
+
+The full list of settings can be found in <a href="https://clickhouse.yandex/docs/en/operations/settings/">Settings section</a> of the Clickhouse documentation.
 
 You do not need do define all of this in case you are using default configurations.
-For example if in your workflow only the database is different.
+
+For example if you need to create a client object with readonly access, pass "readonly" parameter.
 
 ```php
 $config = new Config(
@@ -94,11 +97,11 @@ $client= new Client($config);
 
 ## Reading from Clickhouse
 
-There are several methods for reading data from clickhouse.
+There are several methods for reading data from Clickhouse.
 
 ### Simple Query
 
-This method is primarily used for getting statistics, aggregated data from clickhouse.
+This method is primarily used for getting statistics, aggregated data from Clickhouse.
 
 ```php
 # perform select
@@ -119,7 +122,7 @@ Each client query returns a response with all the information about the connecti
 
 ### Query data into Stream
 
-It is possible to read data from clickhouse directly into a stream - a file for example.
+It is possible to read data from Clickhouse directly into a stream - a file for example.
 
 ```php
 # create a stream - open a file
@@ -133,7 +136,7 @@ $client->queryStream(
 
 ### Query data into Closure (function-callable)
 
-This method is useful when you intend to divide one clickhouse response into several destinations.
+This method is useful when you intend to divide one Clickhouse response into several destinations.
  
  ```php
  # open file 1
@@ -172,10 +175,10 @@ $client->write('INSERT INTO myTable VALUES (1), (2), (3)');
 
 ### Rows Insert
 
-The safest and easiest way to insert data into clickhouse table is to use "writeRows" methods. 
-The method takes the table to insert data to as first parameter, and php array of rows as second.
-When inserting data, method "writeRows" encodes the data into appropriate format for clickhouse database to interpret.
-By default it is JSON format. This ensures no manual escape of data is required.
+The safest and easiest way to insert data into clickhouse table is to use "writeRows" method. 
+The method takes first half of the insert statement as the first parameter and php array of rows as second.
+When inserting data method "writeRows" encodes the data into appropriate format for Clickhouse database to interpret.
+By default it is JSON format. Such approach does not require explicit escaping.
 
 ```php
 # write data to a table
@@ -204,7 +207,7 @@ $client->writeStream(
 );
 ```
 
-This method actually accepts data not only from a file, but from a stream.
+This method actually accepts data not only from a file, but from any php stream resource.
 Thus we can import data from other places, like memory (or anything that can be represented as a stream, really).
 
 ```php
@@ -237,7 +240,7 @@ $client->system('KILL QUERY WHERE query_id = "SOME-QUERY-ID"');
 
 In case of failure to perform the operation client throws an Exception.
 
-It is also possible to change the database to query.
+It is also possible to change the database for the whole client.
 
 ```php
 # change database
@@ -257,11 +260,11 @@ $config->change('database', 'new-database');
 
 ## Formats
 
-There are several formats that clickhouse support. This is used for retrieving and inserting data.
-By default JSON is used. 
-When you perform simple select / insert queries data is encoded into JSON and transferred between client and clickhouse.
+There are several formats that Clickhouse support. This is used for retrieving and inserting data.
+Default format is set to JSON. 
+When you perform simple select / insert queries data is encoded into JSON and transferred between client and Clickhouse.
 This does not work for Stream / Closure queries/writes.
-When performing any query/write you can change format, by passing a class name as the last parameter.
+When performing any query/write you can change format of communication by passing a class name as the last parameter.
 
 ```php
 use ClickhouseClient\Client\Format;
@@ -297,15 +300,15 @@ $client = new Client($config, null);
 
 ## Ping
 
-Clickhouse Database supports a ping method, yay. So this client supports it as well.
+Clickhouse Database supports a ping method.
 
-You can check if the database responds properly using "ping" method.
+You can check if the database responds properly using "ping" method of the client.
 
 ```php
 $client->ping();
 ```
 
-If you do not get an Exception out of this, that's generally a good sing.
+In case of connection problems an Exception will be thrown.
 
 ## Exception handling
 
@@ -327,10 +330,6 @@ try {
     $ex->getMessage();
 }
 ```
-
-## Tests
-
-Well, we have got some. They do not fail, and fairly work most of the time.
 
 ## Support
 

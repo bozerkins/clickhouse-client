@@ -16,6 +16,9 @@ use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends DefaultTest
 {
+    /**
+     * @throws Exception
+     */
     public function testPingConfig()
     {
         $config = new Config(
@@ -29,7 +32,13 @@ class ConfigTest extends DefaultTest
             1,
             $client->query('SELECT 1')->getContent()['data'][0][1]
         );
+    }
 
+    /**
+     * @throws Exception
+     */
+    public function testWrongPasswordConfig()
+    {
         $config = new Config(
             ['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']],
             ['database' => $this->config['database']],
@@ -42,6 +51,45 @@ class ConfigTest extends DefaultTest
         $client->query('SELECT 1');
     }
 
+    /**
+     * @throws Exception
+     */
+    public function testPostConfigCreationChanges()
+    {
+        $config = new Config(['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']]);
+        $config->setUser($this->config['user']);
+        $config->setPassword($this->config['password']);
+        $config->change('database', $this->config['database']);
+
+
+        $client = new Client($config, JsonFormat::class);
+        $this->assertEquals(
+            1,
+            $client->query('SELECT 1')->getContent()['data'][0][1]
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function testDatabaseChange()
+    {
+        $config = new Config(
+            ['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']],
+            ['database' => $this->config['database']],
+            ['user' => $this->config['user'], 'password' => $this->config['password']]
+        );
+
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Code: 81, e.displayText() = DB::Exception: Database `new-database` doesn\'t exist, e.what() = DB::Exception');
+        $client = new Client($config, JsonFormat::class);
+        $client->config()->change('database', 'new-database');
+        $client->query('SELECT 1');
+    }
+
+    /**
+     * @throws Exception
+     */
     public function testHandlingTimeouts()
     {
         $config = new Config(

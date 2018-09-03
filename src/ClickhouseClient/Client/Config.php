@@ -140,8 +140,32 @@ class Config
     /**
      * @return array
      */
+    public function getCredentialHeaders(): array
+    {
+        $headers = [];
+        $headers[] = "X-ClickHouse-User: " . $this->credentials['user'];
+        $headers[] = "X-ClickHouse-Key: " . $this->credentials['password'];
+        return $headers;
+    }
+
+    /**
+     * @return array
+     */
     public function getCurlOptions(): array
     {
         return $this->curlOptions;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCurlUrl(): string
+    {
+        return sprintf(
+            '%s://%s:%s',
+            $this->basics['protocol'],
+            $this->basics['host'],
+            $this->basics['port']
+        );
     }
 }

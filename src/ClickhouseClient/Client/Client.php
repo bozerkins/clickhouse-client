@@ -33,23 +33,21 @@ class Client
     public function __construct(Config $config, string $defaultFormatClass = JsonFormat::class)
     {
         $this->config = $config;
-
-        $connectorConfig = new \ClickhouseClient\Connector\Config();
-        $connectorConfig->setHost($this->config->getBasics()['host']);
-        $connectorConfig->setPort($this->config->getBasics()['port']);
-        $connectorConfig->setProtocol($this->config->getBasics()['protocol']);
-        $connectorConfig->setUser($this->config->getCredentials()['user']);
-        $connectorConfig->setPassword($this->config->getCredentials()['password']);
-        if ($this->config->getCurlOptions()) {
-            $connectorConfig->setDefaultCurlOptions($this->config->getCurlOptions());
-        }
-        $this->connector = new Connector($connectorConfig);
+        $this->connector = new Connector($this->config);
 
         $this->format = null;
         if ($defaultFormatClass) {
             $this->isValidFormatClass($defaultFormatClass);
             $this->format = new $defaultFormatClass();
         }
+    }
+
+    /**
+     * @return Config
+     */
+    public function config()
+    {
+        return $this->config;
     }
 
     /**

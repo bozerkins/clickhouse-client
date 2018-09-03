@@ -9,6 +9,7 @@
 namespace ClickhouseClient\Connector;
 
 
+use ClickhouseClient\Client\Config;
 use ClickhouseClient\Client\Format\FormatInterface;
 use ClickhouseClient\Exception\Exception;
 
@@ -25,13 +26,17 @@ class Connector
         $this->config = $config;
     }
 
+    /**
+     * @param array $query
+     * @return resource
+     */
     public function createResource(array $query = [])
     {
         // create curl resource
         $ch = curl_init();
 
         // set default curl options
-        foreach ($this->config->getDefaultCurlOptions() as $key => $option) {
+        foreach ($this->config->getCurlOptions() as $key => $option) {
             curl_setopt($ch, $key, $option);
         }
 
@@ -39,20 +44,11 @@ class Connector
         curl_setopt(
             $ch,
             CURLOPT_URL,
-            sprintf(
-                '%s://%s:%s%s',
-                $this->config->getProtocol(),
-                $this->config->getHost(),
-                $this->config->getPort(),
-                ($query ? '?' . http_build_query($query) : '')
-            )
+            $this->config->getCurlUrl() . ($query ? '?' . http_build_query($query) : '')
         );
 
         // set headers
-        $headers = [];
-        $headers[] = "X-ClickHouse-User: " . $this->config->getUser();
-        $headers[] = "X-ClickHouse-Key: " . $this->config->getPassword();
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->config->getCredentialHeaders());
 
         //return the transfer as a string
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -60,6 +56,11 @@ class Connector
         return $ch;
     }
 
+    /**
+     * @param array $query
+     * @param string $post
+     * @return resource
+     */
     public function createPostRawResource(array $query, string $post)
     {
         $ch = $this->createResource($query);
@@ -70,6 +71,11 @@ class Connector
         return $ch;
     }
 
+    /**
+     * @param array $query
+     * @param $resource
+     * @return resource
+     */
     public function createPostStreamResource(array $query, $resource)
     {
         $ch = $this->createResource($query);
@@ -81,6 +87,12 @@ class Connector
         return $ch;
     }
 
+    /**
+     * @param $resource
+     * @param FormatInterface|null $format
+     * @return Response
+     * @throws Exception
+     */
     public function performRequest($resource, FormatInterface $format = null)
     {
         // $output contains the output string

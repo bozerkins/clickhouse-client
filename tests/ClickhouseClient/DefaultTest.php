@@ -15,6 +15,9 @@ abstract class DefaultTest extends TestCase
     /** @var  array */
     protected $config;
 
+    /**
+     *
+     */
     protected function setUp()
     {
         $this->config = [];

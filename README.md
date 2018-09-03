@@ -66,6 +66,22 @@ $config = new Config(
 
 Full list of supported constants can be found in <a href="http://php.net/manual/en/function.curl-setopt.php">curl_setopt function documentation</a>.
 
+You can define credentials or settings after creating the config object
+
+```php
+use ClickhouseClient\Client\Config;
+
+$config = new Config(
+    // basic connection information
+    ['host' => '127.0.0.1', 'port' => '8123', 'protocol' => 'http']
+);
+$config->setUser('user');
+$config->setPassword('password');
+$config->change('database', 'new-db');
+```
+
+Functionality for changing basic connection information and curl settings is not implemented, because changing those settings should both conceptually and technically be considered a new client.
+
 ## Client
 
 Creating a client is fairly simple.
@@ -221,6 +237,24 @@ $client->system('KILL QUERY WHERE query_id = "SOME-QUERY-ID"');
 
 In case of failure to perform the operation client throws an Exception.
 
+It is also possible to change the database to query.
+
+```php
+# change database
+$client->config()->change('database', 'new-database');
+```
+
+This uses the same config object which is passed on "Client" object creation, so this code will also work.
+
+```php
+# create config
+$config = new Config();
+# create client
+$client = new Client($config);
+# change database
+$config->change('database', 'new-database');
+```
+
 ## Formats
 
 There are several formats that clickhouse support. This is used for retrieving and inserting data.
@@ -300,8 +334,7 @@ Well, we have got some. They do not fail, and fairly work most of the time.
 
 ## Support
 
-How much do we care?
-Enough to leave an email just here: <a href="b.ozerkins@gmail.com">b.ozerkins@gmail.com</a>
+In case of ANY issues with the library please create <a href="https://github.com/bozerkins/clickhouse-client/issues/new">an Issue on GitHub</a> or contact by email <a href="b.ozerkins@gmail.com">b.ozerkins@gmail.com</a>
 
 
 

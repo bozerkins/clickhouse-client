@@ -11,61 +11,41 @@ namespace ClickhouseClient;
 use ClickhouseClient\Client\Client;
 use ClickhouseClient\Client\Config;
 use ClickhouseClient\Client\Format;
-use PHPUnit\Framework\TestCase;
 
-class ClientWorkflowTest extends DefaultTest
+class ClientFormatTest extends DefaultTest
 {
-    /** @var  Client */
-    protected $client;
+    /** @var  Config */
+    protected $clientConfig;
 
+    /**
+     * @throws \Exception
+     */
     protected function setUp()
     {
         parent::setUp();
 
-        $config = new Config(
+        $this->clientConfig = new Config(
             ['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']],
             ['database' => $this->config['database']],
             ['user' => $this->config['user'], 'password' => $this->config['password']]
         );
-
-        $this->client = new Client(
-            $config,
-            Format\JsonFormat::class
-        );
     }
 
-    public function testPing()
-    {
-        $response = $this->client->ping();
-        $this->assertEquals(
-            "Ok.\n",
-            $response->getContent()
-        );
-    }
-
-    public function testSystemQuery()
-    {
-        $dbs = $this->client->query('SHOW DATABASES')->getContent()['data'];
-        $this->assertTrue(is_array($dbs));
-
-        $found = false;
-        foreach($dbs as $db) {
-            if ($db['name'] === 'default') {
-                $found = true;
-            }
-        }
-        $this->assertTrue($found);
-    }
-
+    /**
+     * @throws Exception\Exception
+     * @throws \Exception
+     */
     public function testWorkflowDefaultFormat()
     {
-        $this->client->system('DROP TABLE IF EXISTS t');
+        $client = new Client($this->clientConfig);
 
-        $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
+        $client->system('DROP TABLE IF EXISTS t');
 
-        $this->client->write('INSERT INTO t VALUES (1), (2), (3)');
+        $client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writeRows('INSERT INTO t',
+        $client->write('INSERT INTO t VALUES (1), (2), (3)');
+
+        $client->writeRows('INSERT INTO t',
             [
                 ['a' => 5],
                 ['a' => 6],
@@ -77,27 +57,33 @@ class ClientWorkflowTest extends DefaultTest
         fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
         rewind($stream);
 
-        $this->client->writeStream('INSERT INTO t', $stream);
+        $client->writeStream('INSERT INTO t', $stream);
 
-        $list = $this->client->query('SELECT * FROM t ORDER BY a ASC')->getContent();
+        $list = $client->query('SELECT * FROM t ORDER BY a ASC')->getContent();
 
         $this->assertEquals(
             "[{\"a\":1},{\"a\":2},{\"a\":3},{\"a\":5},{\"a\":6},{\"a\":7},{\"a\":8},{\"a\":9}]",
             json_encode($list['data'])
         );
 
-        $this->client->system('DROP TABLE t');
+        $client->system('DROP TABLE t');
     }
 
+    /**
+     * @throws Exception\Exception
+     * @throws \Exception
+     */
     public function testWorkflowJsonEachRow()
     {
-        $this->client->system('DROP TABLE IF EXISTS t');
+        $client = new Client($this->clientConfig);
 
-        $this->client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
+        $client->system('DROP TABLE IF EXISTS t');
 
-        $this->client->write('INSERT INTO t VALUES (1), (2), (3)');
+        $client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8) ENGINE = Memory');
 
-        $this->client->writeRows('INSERT INTO t',
+        $client->write('INSERT INTO t VALUES (1), (2), (3)');
+
+        $client->writeRows('INSERT INTO t',
             [
                 ['a' => 5],
                 ['a' => 6],
@@ -110,13 +96,13 @@ class ClientWorkflowTest extends DefaultTest
         fwrite($stream, '{"a":8}'.PHP_EOL.'{"a":9}'.PHP_EOL );
         rewind($stream);
 
-        $this->client->writeStream(
+        $client->writeStream(
             'INSERT INTO t',
             $stream,
             Format\JsonEachRowFormat::class
         );
 
-        $list = $this->client->query(
+        $list = $client->query(
             'SELECT * FROM t ORDER BY a ASC',
             Format\JsonEachRowFormat::class
         )->getContent();
@@ -126,6 +112,6 @@ class ClientWorkflowTest extends DefaultTest
             json_encode($list)
         );
 
-        $this->client->system('DROP TABLE t');
+        $client->system('DROP TABLE t');
     }
 }

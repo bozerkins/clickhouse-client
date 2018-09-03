@@ -12,11 +12,14 @@ use ClickhouseClient\Client\Client;
 use ClickhouseClient\Client\Config;
 use ClickhouseClient\Client\Format;
 
-class ClientReadTest extends DefaultTest
+class ClientTest extends DefaultTest
 {
     /** @var  Client */
     protected $client;
 
+    /**
+     * @throws \Exception
+     */
     protected function setUp()
     {
         parent::setUp();
@@ -33,18 +36,27 @@ class ClientReadTest extends DefaultTest
         );
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testPingQuery()
     {
         $response = $this->client->ping();
         $this->assertEquals("Ok.\n", $response->getContent());
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testSimpleQuery()
     {
         $response = $this->client->query("SELECT * FROM system.numbers LIMIT 5");
         $this->assertTrue(is_array($response->getContent()) && array_key_exists('data', $response->getContent()));
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testStreamQuery()
     {
         $stream = fopen('php://memory', 'r+');
@@ -59,6 +71,9 @@ class ClientReadTest extends DefaultTest
         }
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testClosureQuery()
     {
         $lines = '';
@@ -69,5 +84,34 @@ class ClientReadTest extends DefaultTest
         $this->client->queryClosure("SELECT * FROM system.numbers LIMIT 5", $closure, Format\JsonEachRowFormat::class);
 
         $this->assertEquals('{"number":"0"}{"number":"1"}{"number":"2"}{"number":"3"}{"number":"4"}', $lines);
+    }
+
+    /**
+     * @throws Exception\Exception
+     */
+    public function testPing()
+    {
+        $response = $this->client->ping();
+        $this->assertEquals(
+            "Ok.\n",
+            $response->getContent()
+        );
+    }
+
+    /**
+     * @throws Exception\Exception
+     */
+    public function testSystemQuery()
+    {
+        $dbs = $this->client->query('SHOW DATABASES')->getContent()['data'];
+        $this->assertTrue(is_array($dbs));
+
+        $found = false;
+        foreach($dbs as $db) {
+            if ($db['name'] === 'default') {
+                $found = true;
+            }
+        }
+        $this->assertTrue($found);
     }
 }

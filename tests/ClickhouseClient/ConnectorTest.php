@@ -8,30 +8,32 @@
 
 namespace ClickhouseClient;
 
-use ClickhouseClient\Client\Format\JsonFormat;
-use ClickhouseClient\Connector\Config;
+use ClickhouseClient\Client\Config;
 use ClickhouseClient\Connector\Connector;
-use PHPUnit\Framework\TestCase;
 
 class ConnectorTest extends DefaultTest
 {
     /** @var  Connector */
     private $connector;
 
+    /**
+     *
+     */
     protected function setUp()
     {
         parent::setUp();
 
-        $config = new Config();
-        $config->setHost($this->config['host']);
-        $config->setPort($this->config['port']);
-        $config->setProtocol($this->config['protocol']);
-        $config->setUser($this->config['user']);
-        $config->setPassword($this->config['password']);
-
+        $config = new Config(
+            ['host' => $this->config['host'], 'port' => $this->config['port'], 'protocol' => $this->config['protocol']],
+            ['database' => $this->config['database']],
+            ['user' => $this->config['user'], 'password' => $this->config['password']]
+        );
         $this->connector = new Connector($config);
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testPing()
     {
         $response = $this->connector->performRequest(
@@ -40,9 +42,11 @@ class ConnectorTest extends DefaultTest
         $this->assertEquals("Ok.\n", $response->getContent());
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testSelect()
     {
-
         $response = $this->connector->performRequest(
             $this->connector->createResource(['query' => 'SELECT 1'])
         );
@@ -54,6 +58,9 @@ class ConnectorTest extends DefaultTest
         $this->assertEquals("{\"1\":1}\n", $response->getContent());
     }
 
+    /**
+     * @throws Exception\Exception
+     */
     public function testWorkflow()
     {
         $this->connector->performRequest(

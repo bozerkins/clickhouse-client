@@ -49,7 +49,7 @@ class ClientReadTest extends DefaultTest
     {
         $stream = fopen('php://memory', 'r+');
 
-        $response = $this->client->queryStream("SELECT * FROM system.numbers LIMIT 5", $stream, Format\TabSeparatedFormat::class);
+       $this->client->queryStream("SELECT * FROM system.numbers LIMIT 5", $stream, Format\TabSeparatedFormat::class);
 
         rewind($stream);
 
@@ -66,7 +66,7 @@ class ClientReadTest extends DefaultTest
             $lines .= $line;
         };
 
-        $response = $this->client->queryClosure("SELECT * FROM system.numbers LIMIT 5", $closure, Format\JsonEachRowFormat::class);
+        $this->client->queryClosure("SELECT * FROM system.numbers LIMIT 5", $closure, Format\JsonEachRowFormat::class);
 
         $this->assertEquals('{"number":"0"}{"number":"1"}{"number":"2"}{"number":"3"}{"number":"4"}', $lines);
     }

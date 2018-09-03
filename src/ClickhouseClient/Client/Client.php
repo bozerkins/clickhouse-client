@@ -28,6 +28,7 @@ class Client
      * Client constructor.
      * @param Config $config
      * @param string $defaultFormatClass
+     * @throws \Exception
      */
     public function __construct(Config $config, string $defaultFormatClass = JsonFormat::class)
     {
@@ -53,12 +54,12 @@ class Client
 
     /**
      * @param string $formatClass
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     private function isValidFormatClass(string $formatClass)
     {
         if (!in_array(FormatInterface::class, class_implements($formatClass))) {
-            throw new \Exception('Default format class received (' . $formatClass . ') does not implement ' . FormatInterface::class);
+            throw new \RuntimeException('Default format class received (' . $formatClass . ') does not implement ' . FormatInterface::class);
         }
     }
 
@@ -77,6 +78,7 @@ class Client
 
     /**
      * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
      */
     public function ping()
     {
@@ -90,6 +92,7 @@ class Client
      * @param string $sql
      * @param string|null $formatClass
      * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
      */
     public function query(string $sql, string $formatClass = null)
     {
@@ -113,6 +116,13 @@ class Client
         return $response;
     }
 
+    /**
+     * @param string $sql
+     * @param $stream
+     * @param string|null $formatClass
+     * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
+     */
     public function queryStream(string $sql, $stream, string $formatClass = null)
     {
         $format = $this->defineFormat($formatClass);
@@ -139,6 +149,13 @@ class Client
 
     }
 
+    /**
+     * @param string $sql
+     * @param \Closure $closure
+     * @param string|null $formatClass
+     * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
+     */
     public function queryClosure(string $sql, \Closure $closure, string $formatClass = null)
     {
         $format = $this->defineFormat($formatClass);
@@ -190,6 +207,11 @@ class Client
         return $response;
     }
 
+    /**
+     * @param string $sql
+     * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
+     */
     public function write(string $sql)
     {
         $response = $this->connector->performRequest(
@@ -201,6 +223,13 @@ class Client
         return $response;
     }
 
+    /**
+     * @param string $sql
+     * @param array $rows
+     * @param string|null $formatClass
+     * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
+     */
     public function writeRows(string $sql, array $rows, string $formatClass = null)
     {
         // set default format
@@ -228,6 +257,13 @@ class Client
         return $response;
     }
 
+    /**
+     * @param string $sql
+     * @param $resource
+     * @param string|null $formatClass
+     * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
+     */
     public function writeStream(string $sql, $resource, string $formatClass = null)
     {
         // set default format
@@ -253,6 +289,7 @@ class Client
     /**
      * @param string $sql
      * @return \ClickhouseClient\Connector\Response
+     * @throws \ClickhouseClient\Exception\Exception
      */
     public function system(string $sql)
     {

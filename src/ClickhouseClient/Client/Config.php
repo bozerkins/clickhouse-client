@@ -73,11 +73,19 @@ class Config
     }
 
     /**
-     * @param OptionsResolver $resolver
+     * @param string $user
      */
-    private function configureCurlOptions(OptionsResolver $resolver)
+    public function setUser(string $user)
     {
-        //todo: implement or remove this method
+        $this->credentials['user'] = $user;
+    }
+
+    /**
+     * @param string $password
+     */
+    public function setPassword(string $password)
+    {
+        $this->credentials['password'] = $password;
     }
 
     /**

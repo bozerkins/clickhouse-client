@@ -45,10 +45,14 @@ class ConfigTest extends DefaultTest
             ['user' => $this->config['user'], 'password' => $this->config['password'] . md5(rand(1000, 2000))]
         );
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Code: 193, e.displayText() = DB::Exception: Wrong password for user default, e.what() = DB::Exception");
-        $client = new Client($config, JsonFormat::class);
-        $client->query('SELECT 1');
+        $exception = null;
+        try {
+            $client = new Client($config, JsonFormat::class);
+            $client->query('SELECT 1');
+        } catch (\Throwable $exception) {
+            $this->assertContains("DB::Exception: Wrong password for user default", $exception->getMessage());
+        }
+        $this->assertInstanceOf(Exception::class, $exception);
     }
 
     /**
@@ -80,11 +84,15 @@ class ConfigTest extends DefaultTest
             ['user' => $this->config['user'], 'password' => $this->config['password']]
         );
 
-        $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Code: 81, e.displayText() = DB::Exception: Database `new-database` doesn't exist, e.what() = DB::Exception");
-        $client = new Client($config, JsonFormat::class);
-        $client->config()->change('database', 'new-database');
-        $client->query('SELECT 1');
+        $exception = null;
+        try {
+            $client = new Client($config, JsonFormat::class);
+            $client->config()->change('database', 'new-database');
+            $client->query('SELECT 1');
+        } catch (\Throwable $exception) {
+            $this->assertContains("DB::Exception: Database `new-database` doesn't exist", $exception->getMessage());
+        }
+        $this->assertInstanceOf(Exception::class, $exception);
     }
 
     /**

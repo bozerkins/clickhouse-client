@@ -46,7 +46,7 @@ class ConfigTest extends DefaultTest
         );
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Code: 193, e.displayText() = DB::Exception: Wrong password for user default, e.what() = DB::Exception\n");
+        $this->expectExceptionMessage("Code: 193, e.displayText() = DB::Exception: Wrong password for user default\n");
         $client = new Client($config, JsonFormat::class);
         $client->query('SELECT 1');
     }
@@ -81,7 +81,7 @@ class ConfigTest extends DefaultTest
         );
 
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage("Code: 81, e.displayText() = DB::Exception: Database `new-database` doesn\'t exist, e.what() = DB::Exception\n");
+        $this->expectExceptionMessage("Code: 81, e.displayText() = DB::Exception: Database `new-database` doesn\'t exist\n");
         $client = new Client($config, JsonFormat::class);
         $client->config()->change('database', 'new-database');
         $client->query('SELECT 1');

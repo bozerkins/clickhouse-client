@@ -21,7 +21,6 @@
     "symfony/options-resolver": ">=2.8"
   },
   "require-dev": {
-    "php": ">=7.2",
     "phpunit/phpunit": "^6.2",
     "symfony/var-dumper": ">=2.8"
   }

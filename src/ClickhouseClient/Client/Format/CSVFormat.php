@@ -9,7 +9,7 @@
 namespace ClickhouseClient\Client\Format;
 
 
-class TabSeparatedFormat implements  FormatInterface
+class CSVFormat implements  FormatInterface
 {
 
     /**
@@ -19,7 +19,7 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function queryFormat(): string
     {
-        return 'TabSeparatedWithNames';
+        return 'CSVWithNames';
     }
 
     /**
@@ -29,7 +29,7 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function insertFormat(): string
     {
-        return 'TabSeparated';
+        return 'CSV';
     }
 
     /**
@@ -42,7 +42,7 @@ class TabSeparatedFormat implements  FormatInterface
     public function encode(array $row): string
     {
         $stream = fopen('php://memory', 'r+');
-        fputcsv($stream, $row, "\t");
+        fputcsv($stream, $row);
         rewind($stream);
         $line = fgets($stream);
         fclose($stream);
@@ -62,11 +62,11 @@ class TabSeparatedFormat implements  FormatInterface
         fputs($stream, $row);
         rewind($stream);
         $result = [];
-        $names = fgetcsv($stream, 0, "\t");
+        $names = fgetcsv($stream);
         if (empty($names) === true) {
             throw new \RuntimeException('failed decoding names from response');
         }
-        while(($row = fgetcsv($stream, 0, "\t")) !== false) {
+        while(($row = fgetcsv($stream)) !== false) {
             $result[] = array_combine($names, $row);
         }
         fclose($stream);

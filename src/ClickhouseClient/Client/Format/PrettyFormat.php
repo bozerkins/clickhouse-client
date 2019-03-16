@@ -9,7 +9,7 @@
 namespace ClickhouseClient\Client\Format;
 
 
-class TabSeparatedFormat implements  FormatInterface
+class PrettyFormat implements  FormatInterface
 {
 
     /**
@@ -19,7 +19,7 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function queryFormat(): string
     {
-        return 'TabSeparatedWithNames';
+        return 'Pretty';
     }
 
     /**
@@ -29,7 +29,7 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function insertFormat(): string
     {
-        return 'TabSeparated';
+        throw new \RuntimeException(__CLASS__ . ' does not support data insert');
     }
 
     /**
@@ -41,12 +41,7 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function encode(array $row): string
     {
-        $stream = fopen('php://memory', 'r+');
-        fputcsv($stream, $row, "\t");
-        rewind($stream);
-        $line = fgets($stream);
-        fclose($stream);
-        return $line;
+        throw new \RuntimeException(__CLASS__ . ' does not support data encoding');
     }
 
     /**
@@ -58,18 +53,6 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function decode(string $row): array
     {
-        $stream = fopen('php://memory', 'r+');
-        fputs($stream, $row);
-        rewind($stream);
-        $result = [];
-        $names = fgetcsv($stream, 0, "\t");
-        if (empty($names) === true) {
-            throw new \RuntimeException('failed decoding names from response');
-        }
-        while(($row = fgetcsv($stream, 0, "\t")) !== false) {
-            $result[] = array_combine($names, $row);
-        }
-        fclose($stream);
-        return $result;
+        return [$row];
     }
 }

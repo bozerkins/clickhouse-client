@@ -65,6 +65,8 @@ class ClientTest extends DefaultTest
 
         rewind($stream);
 
+        $this->assertEquals('number' . PHP_EOL, fgets($stream));
+
         for ($i = 0; $i < 5; $i++) {
             $iString = (string)$i;
             $this->assertEquals($iString . PHP_EOL, fgets($stream));

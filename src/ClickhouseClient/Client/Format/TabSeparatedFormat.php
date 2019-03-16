@@ -19,7 +19,7 @@ class TabSeparatedFormat implements  FormatInterface
      */
     public function queryFormat(): string
     {
-        return 'TabSeparated';
+        return 'TabSeparatedWithNames';
     }
 
     /**
@@ -42,7 +42,7 @@ class TabSeparatedFormat implements  FormatInterface
     public function encode(array $row): string
     {
         $stream = fopen('php://memory', 'r+');
-        fputcsv($stream, $row);
+        fputcsv($stream, $row, "\t");
         rewind($stream);
         $line = fgets($stream);
         fclose($stream);
@@ -62,8 +62,12 @@ class TabSeparatedFormat implements  FormatInterface
         fputs($stream, $row);
         rewind($stream);
         $result = [];
-        while(($row = fgetcsv($stream)) !== false) {
-            $result[] = $row;
+        $names = fgetcsv($stream, 0, "\t");
+        if (empty($names) === true) {
+            throw new \RuntimeException('failed decoding names from response');
+        }
+        while(($row = fgetcsv($stream, 0, "\t")) !== false) {
+            $result[] = array_combine($names, $row);
         }
         fclose($stream);
         return $result;

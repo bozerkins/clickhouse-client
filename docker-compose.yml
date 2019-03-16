@@ -1,0 +1,15 @@
+version: '3'
+services:
+  clickhouse_lib:
+    build:
+      context: ./docker
+    depends_on:
+      - clickhouse_db
+    volumes:
+      - ./:/var/www/html
+    environment:
+      - CLICKHOUSE_HOST=clickhouse_db
+  clickhouse_db:
+    image: yandex/clickhouse-server
+    ports:
+      - 8123:8123

@@ -20,13 +20,10 @@ jobs:
       - run:
           name: Install ClickHouse
           command: |
-            sudo apt-get update
-            sudo apt-get install software-properties-common
             sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E0C56BD4
             echo "deb http://repo.yandex.ru/clickhouse/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
             sudo apt-get update
-            sudo apt-get install clickhouse-server-common -y
-            sudo apt-get install clickhouse-client -y
+            sudo apt-get install -y software-properties-common clickhouse-server-common clickhouse-client
             sudo sed -e "/<listen_host>::1<\/listen_host>/d" -i /etc/clickhouse-server/config.xml
             sudo service clickhouse-server start
 
@@ -64,13 +61,10 @@ jobs:
       - run:
           name: Install ClickHouse
           command: |
-            sudo apt-get update
-            sudo apt-get install software-properties-common
             sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E0C56BD4
             echo "deb http://repo.yandex.ru/clickhouse/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
             sudo apt-get update
-            sudo apt-get install clickhouse-server-common -y
-            sudo apt-get install clickhouse-client -y
+            sudo apt-get install -y software-properties-common clickhouse-server-common clickhouse-client
             sudo sed -e "/<listen_host>::1<\/listen_host>/d" -i /etc/clickhouse-server/config.xml
             sudo service clickhouse-server start
 
@@ -108,13 +102,10 @@ jobs:
       - run:
           name: Install ClickHouse
           command: |
-            sudo apt-get update
-            sudo apt-get install software-properties-common
             sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E0C56BD4
             echo "deb http://repo.yandex.ru/clickhouse/deb/stable/ main/" | sudo tee /etc/apt/sources.list.d/clickhouse.list
             sudo apt-get update
-            sudo apt-get install clickhouse-server-common -y
-            sudo apt-get install clickhouse-client -y
+            sudo apt-get install -y software-properties-common clickhouse-server-common clickhouse-client
             sudo sed -e "/<listen_host>::1<\/listen_host>/d" -i /etc/clickhouse-server/config.xml
             sudo service clickhouse-server start
       - run:

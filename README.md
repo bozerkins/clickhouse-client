@@ -171,7 +171,8 @@ Most common way of writing to a database.
 $client->write('INSERT INTO myTable VALUES (1), (2), (3)');
 ```
 
-> NOTE: clickhouse does not have escape mechanisms like MySQL / Oracle / etc. For save inserts please see other insert methods.
+> NOTE: clickhouse does not have escape mechanisms like MySQL / Oracle / etc.
+> For safe inserts please see other insert methods.
 
 ### Rows Insert
 

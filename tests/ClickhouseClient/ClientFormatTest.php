@@ -159,4 +159,51 @@ class ClientFormatTest extends DefaultTest
 
         $client->system('DROP TABLE t');
     }
+
+
+
+    /**
+     * @throws Exception\Exception
+     * @throws \Exception
+     */
+    public function testWorkflowCSV()
+    {
+        $client = new Client($this->clientConfig);
+
+        $client->system('DROP TABLE IF EXISTS t');
+        $client->system('CREATE TABLE IF NOT EXISTS t  (a UInt8, b String) ENGINE = Memory');
+        $client->write('INSERT INTO t VALUES (1, \'one\'), (2, \'two\'), (3, \'three\')');
+        $client->writeRows('INSERT INTO t',
+            [
+                ['a' => 5, 'b' => 'five'],
+                ['a' => 6, 'b' => 'six'],
+                ['a' => 7, 'b' => 'seven']
+            ],
+            Format\CSVFormat::class
+        );
+
+        $stream = fopen('php://memory','r+');
+        fwrite($stream, "8,eight".PHP_EOL."9,nine".PHP_EOL );
+        rewind($stream);
+
+        $client->writeStream(
+            'INSERT INTO t',
+            $stream,
+            Format\CSVFormat::class
+        );
+
+        $list = $client->query(
+            'SELECT * FROM t ORDER BY a ASC',
+            Format\CSVFormat::class
+        )->getContent();
+
+        $this->assertEquals(
+            '[{"a":"1","b":"one"},{"a":"2","b":"two"},{"a":"3","b":"three"},'.
+            '{"a":"5","b":"five"},{"a":"6","b":"six"},{"a":"7","b":"seven"},'.
+            '{"a":"8","b":"eight"},{"a":"9","b":"nine"}]',
+            json_encode($list)
+        );
+
+        $client->system('DROP TABLE t');
+    }
 }

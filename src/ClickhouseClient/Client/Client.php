@@ -240,7 +240,7 @@ class Client
         // encode rows
         $rowsEncoded = '';
         foreach($rows as $row) {
-            $rowsEncoded .= $this->format->encode($row) . PHP_EOL;
+            $rowsEncoded .= $format->encode($row);
         }
 
         $response = $this->connector->performRequest(
